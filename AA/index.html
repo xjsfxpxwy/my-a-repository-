@@ -8,7 +8,6 @@
 </head>
 <body>
     <div id="canvas-container"></div>
-
     <!-- 隐藏的文件上传输入 -->
     <input type="file" id="hidden-texture-file-input" accept="image/*,video/*" style="display:none;">
     <input type="file" id="hidden-ground-file-input" accept="image/*" style="display:none;">
@@ -25,40 +24,50 @@
     <input type="file" id="hidden-video-dual-vertical-input" accept="video/*" style="display:none;">
 
     <div class="ui-layer">
-        <!-- 顶部按钮区域（两行网格，16个按钮） -->
-        <div class="top-groups-container" id="top-groups-container">
-            <!-- 第一行：⬅️ ♊️ ➡️ 空位 球体 圆柱 圆锥 圆台 -->
-            <button class="float-btn btn-top ctrl-btn" id="btn-undo" title="回退">⬅️</button>
-            <button class="float-btn btn-top ctrl-btn" id="btn-reset-all" title="重置所有功能">♊️</button>
-            <button class="float-btn btn-top ctrl-btn" id="btn-redo" title="前进">➡️</button>
-            <button class="float-btn btn-top placeholder-btn" style="visibility:hidden; pointer-events:none;">空</button>
-            <button class="float-btn btn-top shape-btn" data-shape="sphere">球体</button>
-            <button class="float-btn btn-top shape-btn" data-shape="cylinder">圆柱</button>
-            <button class="float-btn btn-top shape-btn" data-shape="cone">圆锥</button>
-            <button class="float-btn btn-top shape-btn" data-shape="frustum_cone">圆台</button>
-            <!-- 第二行：圆环 圆管 方体 方管 棱锥 棱台 平面 ❇️ -->
-            <button class="float-btn btn-top shape-btn" data-shape="torus">圆环</button>
-            <button class="float-btn btn-top shape-btn" data-shape="pipe">圆管</button>
-            <button class="float-btn btn-top shape-btn" data-shape="cube">方体</button>
-            <button class="float-btn btn-top shape-btn" data-shape="square_tube">方管</button>
-            <button class="float-btn btn-top shape-btn" data-shape="pyramid">棱锥</button>
-            <button class="float-btn btn-top shape-btn" data-shape="prism_frustum">棱台</button>
-            <button class="float-btn btn-top shape-btn" data-shape="plane">平面</button>
-            <button class="float-btn btn-top shape-btn" id="new-settings-btn">❇️</button>
+        <!-- 顶部按钮区域（重新布局） -->
+        <div class="top-groups-container" id="top-groups-container" style="display:none;">
+            <!-- 第一排：导航按钮 + 形状按钮（8个） -->
+            <div class="top-row" id="top-row-1">
+                <div class="top-nav-group">
+                    <button class="float-btn btn-top" id="btn-back" data-group="front" data-value="back">⬅️</button>
+                    <button class="float-btn btn-top" id="btn-reset-global" title="重置所有几何体">♊️</button>
+                    <button class="float-btn btn-top" id="btn-forward" data-group="front" data-value="forward">➡️</button>
+                    <span class="top-spacer"></span> <!-- 空位 -->
+                </div>
+                <div class="top-shape-group" id="shape-buttons-row1">
+                    <button class="float-btn btn-shape selected-shape" data-shape="sphere">球体</button>
+                    <button class="float-btn btn-shape" data-shape="cylinder">圆柱</button>
+                    <button class="float-btn btn-shape" data-shape="cone">圆锥</button>
+                    <button class="float-btn btn-shape" data-shape="frustum_cone">圆台</button>
+                </div>
+            </div>
+            <!-- 第二排：形状按钮（8个） -->
+            <div class="top-row" id="top-row-2">
+                <div class="top-shape-group" id="shape-buttons-row2">
+                    <button class="float-btn btn-shape" data-shape="torus">圆环</button>
+                    <button class="float-btn btn-shape" data-shape="pipe">圆管</button>
+                    <button class="float-btn btn-shape" data-shape="cube">方体</button>
+                    <button class="float-btn btn-shape" data-shape="square_tube">方管</button>
+                    <button class="float-btn btn-shape" data-shape="pyramid">棱锥</button>
+                    <button class="float-btn btn-shape" data-shape="prism_frustum">棱台</button>
+                    <button class="float-btn btn-shape" data-shape="plane">平面</button>
+                    <button class="float-btn btn-shape" id="new-settings-btn" style="background:transparent; border:none;">❇️</button>
+                </div>
+            </div>
         </div>
 
-        <!-- 底部按钮组（名称调整：形状、视角） -->
+        <!-- 底部按钮组（一级按钮） -->
         <div class="bottom-group" id="bottom-group">
-            <button class="float-btn btn-bottom" id="toggle-all-ui-btn">💠</button>
-            <button class="float-btn btn-bottom" data-category="select">形状</button>
-            <button class="float-btn btn-bottom" data-category="style">视角</button>
-            <button class="float-btn btn-bottom" data-category="combo">构建</button>
+            <button class="float-btn btn-bottom" id="toggle-all-ui-btn">🌐</button>
+            <button class="float-btn btn-bottom" data-category="shape">形状</button>
+            <button class="float-btn btn-bottom" data-category="perspective">视角</button>
+            <button class="float-btn btn-bottom" data-category="build">构建</button>
             <button class="float-btn btn-bottom" data-category="scene">场景</button>
             <button class="float-btn btn-bottom" data-category="storage">存储</button>
             <button class="float-btn btn-bottom" data-category="search">搜索</button>
         </div>
 
-        <!-- 右侧视角工具面板（位置已移到底部按钮上方） -->
+        <!-- 右侧视角工具面板（二级） -->
         <div class="style-tools-panel" id="style-tools-panel" style="display: none;">
             <button class="tool-btn" data-tool="positioning">相机</button>
             <button class="tool-btn" data-tool="material">材质</button>
@@ -67,8 +76,8 @@
             <button class="tool-btn" data-tool="texture" id="texture-tool-btn">纹理</button>
         </div>
 
-        <!-- 构建工具面板（位置已移到底部按钮上方） -->
-        <div class="build-tools-panel" id="build-tools-panel" style="display: none;">
+        <!-- 构建工具面板（二级） -->
+        <div class="build-tools-panel" id="build-tools-panel" style="position: fixed; right: 18px; top: 250px; display: none; flex-direction: column; gap: 18px; z-index: 102;">
             <button class="tool-btn" data-build-tool="boolean">布尔</button>
             <button class="tool-btn" data-build-tool="fractal">分型</button>
             <button class="tool-btn" data-build-tool="modifier-stack">修改器堆栈</button>
@@ -185,7 +194,7 @@
             <div class="panel-content-scroll" id="scene-controls-container"></div>
         </div>
 
-        <!-- ==================== 布尔运算设置面板（静态完整内容） ==================== -->
+        <!-- ===================== 布尔运算设置面板 ===================== -->
         <div class="settings-panel" id="boolean-settings-panel">
             <div class="settings-header">
                 <div class="settings-title">布尔运算</div>
@@ -206,42 +215,41 @@
                     <div class="result-hint" id="bool-result-hint">合集：保留 A + B 整体，内部重合面移除</div>
                 </div>
 
-                <!-- 参与对象选择（需要使用2个模型） -->
+                <!-- 目标与工具对象选择 -->
                 <div class="control-group">
-                    <div class="control-title">参与对象 <span style="color:#e74c3c; font-weight:normal;">(需要2个模型)</span></div>
-                    <div class="model-count-bar" id="bool-model-count-info" style="font-size:0.85rem; margin-bottom:6px; font-weight:600;">参与模型数量: 0/2</div>
+                    <div class="control-title">参与对象</div>
                     <div class="obj-row">
                         <span class="obj-label">目标 A</span>
                         <div class="obj-dot green"></div>
-                        <span id="bool-target-a-status" style="font-weight:600;">未选择</span>
-                        <button class="texture-action-btn" id="bool-add-target-a">添加目标A</button>
+                        <span id="bool-target-a-status" style="font-weight:600; flex:1;">未选择</span>
+                        <button class="texture-action-btn" id="bool-pick-target-a">🎯 拾取</button>
+                        <button class="texture-action-btn" id="bool-clear-target-a" style="background:#f0ad4e; border-color:#eea236;">清除</button>
                     </div>
                     <div class="obj-row">
                         <span class="obj-label">工具 B</span>
                         <div class="obj-dot red"></div>
-                        <span id="bool-tool-b-status" style="font-weight:600;">未选择</span>
-                        <button class="texture-action-btn" id="bool-add-tool-b">添加工具B</button>
-                    </div>
-                    <div class="obj-row" style="justify-content: flex-start; gap: 8px;">
-                        <button class="texture-action-btn" id="bool-clear-a" style="background:#f0ad4e; border-color:#eea236;">清除A</button>
-                        <button class="texture-action-btn" id="bool-clear-b" style="background:#f0ad4e; border-color:#eea236;">清除B</button>
+                        <span id="bool-tool-b-status" style="font-weight:600; flex:1;">未选择</span>
+                        <button class="texture-action-btn" id="bool-pick-tool-b">🎯 拾取</button>
+                        <button class="texture-action-btn" id="bool-clear-tool-b" style="background:#f0ad4e; border-color:#eea236;">清除</button>
                     </div>
                 </div>
 
-                <!-- 输出模式 -->
+                <!-- 实时预览与显示切换 -->
                 <div class="control-group">
-                    <div class="control-title">输出模式</div>
-                    <div class="output-section">
-                        <div class="output-title">应用后行为</div>
-                        <div class="output-group">
-                            <button class="output-btn active" data-output="new_model" id="bool-output-new">生成新模型</button>
-                            <button class="output-btn" data-output="replace" id="bool-output-replace">替换目标 A</button>
-                        </div>
-                        <div class="output-desc" id="bool-output-desc">✅ 生成独立的 Result 模型，源物体不再保留</div>
+                    <div class="control-title">预览与显示</div>
+                    <div class="control-row">
+                        <button class="toggle-btn active" id="bool-preview-toggle">实时预览</button>
+                        <button class="toggle-btn" id="bool-wireframe-toggle">工具B线框</button>
+                        <button class="toggle-btn" id="bool-transparent-toggle">工具B半透明</button>
+                    </div>
+                    <div class="control-row" style="margin-top:8px;">
+                        <span class="control-label">预览颜色</span>
+                        <input type="color" id="bool-preview-color" value="#ffaa00">
+                        <span class="slider-value" style="flex:1; text-align:left;">（半透明预览）</span>
                     </div>
                 </div>
 
-                <!-- 参数 -->
+                <!-- 参数与容差 -->
                 <div class="control-group">
                     <div class="control-title">参数</div>
                     <div class="param-row">
@@ -251,14 +259,20 @@
                     <div class="slider-wrap">
                         <input type="range" id="bool-tol-slider" min="-8" max="-3" step="1" value="-6">
                     </div>
-                    <label class="cb-row">
+                    <div class="cb-row">
                         <input type="checkbox" id="bool-merge-verts" checked>
                         <span class="cb-label">合并重合顶点</span>
-                    </label>
-                    <label class="cb-row">
-                        <input type="checkbox" id="bool-hole-fill" checked>
-                        <span class="cb-label">自动封口</span>
-                    </label>
+                    </div>
+                </div>
+
+                <!-- 材质继承 -->
+                <div class="control-group">
+                    <div class="control-title">材质继承</div>
+                    <div class="option-group">
+                        <label class="option-label selected"><input type="radio" name="bool-material-inherit" value="A" checked> 继承目标A</label>
+                        <label class="option-label"><input type="radio" name="bool-material-inherit" value="B"> 继承工具B</label>
+                        <label class="option-label"><input type="radio" name="bool-material-inherit" value="none"> 默认材质</label>
+                    </div>
                 </div>
 
                 <!-- 错误信息与状态 -->
@@ -267,17 +281,18 @@
                 <!-- 操作按钮 -->
                 <div class="btn-group">
                     <button class="btn btn-apply" id="bool-apply-btn">应用</button>
+                    <button class="btn btn-apply" id="bool-add-to-stack-btn" style="background:#3498db; border-color:#2980b9;">添加到修改器堆栈</button>
                 </div>
 
                 <!-- 状态栏 -->
                 <div class="status-bar">
-                    <span class="status-text" id="bool-status-text">就绪 — 请添加目标A和工具B（需要2个模型）</span>
+                    <span class="status-text" id="bool-status-text">就绪 — 点击拾取选择对象</span>
                     <span class="op-count" id="bool-op-count">操作: 0 次</span>
                 </div>
             </div>
         </div>
 
-        <!-- 修改器堆栈面板 -->
+        <!-- ===================== 修改器堆栈面板 ===================== -->
         <div class="settings-panel" id="modifier-stack-panel">
             <div class="settings-header">
                 <div class="settings-title">修改器堆栈</div>
@@ -342,10 +357,17 @@
             </div>
         </div>
 
-        <!-- ========== 几何体设置面板（保持不变） ========== -->
-        <!-- 球体 -->
+        <!-- ========== 几何体设置面板 ========== -->
+        <!-- 球体设置面板 -->
         <div class="settings-panel" id="sphere-settings-panel">
-            <div class="settings-header"><div class="settings-title">球体设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="sphere">🔙</button><button class="settings-toggle-vis" data-panel="sphere-settings-panel">显</button><button class="settings-close sphere-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">球体设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="sphere">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="sphere-settings-panel">显</button>
+                    <button class="settings-close sphere-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="sphere-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.001"><span>最大值</span><input type="number" class="max-val" step="0.001" value="5"></div>
             <div class="slider-controls">
@@ -354,9 +376,17 @@
                 <div class="slider-item"><div class="slider-label"><span>Rz 缩放</span><input type="number" class="slider-input" id="rz-input" step="0.1" value="1.0"></div><div class="slider-container"><input type="range" class="slider" id="rz-slider" min="0.001" max="5" value="1" step="0.1"></div></div>
             </div>
         </div>
-        <!-- 圆柱 -->
+
+        <!-- 圆柱设置面板 -->
         <div class="settings-panel" id="cylinder-settings-panel">
-            <div class="settings-header"><div class="settings-title">圆柱设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="cylinder">🔙</button><button class="settings-toggle-vis" data-panel="cylinder-settings-panel">显</button><button class="settings-close cylinder-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">圆柱设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="cylinder">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="cylinder-settings-panel">显</button>
+                    <button class="settings-close cylinder-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="cylinder-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.001"><span>最大值</span><input type="number" class="max-val" step="0.001" value="5"></div>
             <div class="slider-controls">
@@ -364,9 +394,17 @@
                 <div class="slider-item"><div class="slider-label"><span>高度</span><input type="number" class="slider-input" id="height-input" step="0.1" value="1.5"></div><div class="slider-container"><input type="range" class="slider" id="height-slider" min="0.001" max="5" value="1.5" step="0.1"></div></div>
             </div>
         </div>
-        <!-- 圆锥 -->
+
+        <!-- 圆锥设置面板 -->
         <div class="settings-panel" id="cone-settings-panel">
-            <div class="settings-header"><div class="settings-title">圆锥设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="cone">🔙</button><button class="settings-toggle-vis" data-panel="cone-settings-panel">显</button><button class="settings-close cone-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">圆锥设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="cone">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="cone-settings-panel">显</button>
+                    <button class="settings-close cone-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="cone-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.001"><span>最大值</span><input type="number" class="max-val" step="0.001" value="5"></div>
             <div class="slider-controls">
@@ -374,9 +412,17 @@
                 <div class="slider-item"><div class="slider-label"><span>高度</span><input type="number" class="slider-input" id="cone-height-input" step="0.1" value="2.0"></div><div class="slider-container"><input type="range" class="slider" id="cone-height-slider" min="0.001" max="5" value="2" step="0.1"></div></div>
             </div>
         </div>
-        <!-- 圆台 -->
+
+        <!-- 圆台设置面板 -->
         <div class="settings-panel" id="frustum-settings-panel">
-            <div class="settings-header"><div class="settings-title">圆台设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="frustum_cone">🔙</button><button class="settings-toggle-vis" data-panel="frustum-settings-panel">显</button><button class="settings-close frustum-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">圆台设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="frustum_cone">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="frustum-settings-panel">显</button>
+                    <button class="settings-close frustum-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="frustum-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.001"><span>最大值</span><input type="number" class="max-val" step="0.001" value="5"></div>
             <div class="slider-controls">
@@ -385,9 +431,17 @@
                 <div class="slider-item"><div class="slider-label"><span>高度</span><input type="number" class="slider-input" id="frustum-height-input" step="0.1" value="1.5"></div><div class="slider-container"><input type="range" class="slider" id="frustum-height-slider" min="0.001" max="5" value="1.5" step="0.1"></div></div>
             </div>
         </div>
-        <!-- 圆环 -->
+
+        <!-- 圆环设置面板 -->
         <div class="settings-panel" id="torus-settings-panel">
-            <div class="settings-header"><div class="settings-title">圆环设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="torus">🔙</button><button class="settings-toggle-vis" data-panel="torus-settings-panel">显</button><button class="settings-close torus-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">圆环设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="torus">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="torus-settings-panel">显</button>
+                    <button class="settings-close torus-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="torus-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.001"><span>最大值</span><input type="number" class="max-val" step="0.001" value="5"></div>
             <div class="slider-controls">
@@ -395,9 +449,17 @@
                 <div class="slider-item"><div class="slider-label"><span>环半径</span><input type="number" class="slider-input" id="ring-radius-input" step="0.1" value="1.0"></div><div class="slider-container"><input type="range" class="slider" id="ring-radius-slider" min="0.001" max="5" value="1" step="0.1"></div></div>
             </div>
         </div>
-        <!-- 方体 -->
+
+        <!-- 方体设置面板 -->
         <div class="settings-panel" id="cube-settings-panel">
-            <div class="settings-header"><div class="settings-title">方体设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="cube">🔙</button><button class="settings-toggle-vis" data-panel="cube-settings-panel">显</button><button class="settings-close cube-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">方体设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="cube">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="cube-settings-panel">显</button>
+                    <button class="settings-close cube-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="cube-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.001"><span>最大值</span><input type="number" class="max-val" step="0.001" value="10"></div>
             <div class="slider-controls">
@@ -406,9 +468,17 @@
                 <div class="slider-item"><div class="slider-label"><span>高度 (Y)</span><input type="number" class="slider-input" id="cube-height-input" step="0.1" value="1.5"></div><div class="slider-container"><input type="range" class="slider" id="cube-height-slider" min="0.001" max="10" value="1.5" step="0.1"></div></div>
             </div>
         </div>
-        <!-- 棱锥 -->
+
+        <!-- 棱锥设置面板 -->
         <div class="settings-panel" id="pyramid-settings-panel">
-            <div class="settings-header"><div class="settings-title">棱锥设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="pyramid">🔙</button><button class="settings-toggle-vis" data-panel="pyramid-settings-panel">显</button><button class="settings-close pyramid-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">棱锥设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="pyramid">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="pyramid-settings-panel">显</button>
+                    <button class="settings-close pyramid-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="pyramid-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.001"><span>最大值</span><input type="number" class="max-val" step="0.001" value="10"></div>
             <div class="slider-controls">
@@ -417,9 +487,17 @@
                 <div class="slider-item"><div class="slider-label"><span>斜高 (Y)</span><input type="number" class="slider-input" id="pyramid-height-input" step="0.1" value="2.0"></div><div class="slider-container"><input type="range" class="slider" id="pyramid-height-slider" min="0.001" max="10" value="2" step="0.1"></div></div>
             </div>
         </div>
-        <!-- 棱台 -->
+
+        <!-- 棱台设置面板 -->
         <div class="settings-panel" id="prism-frustum-settings-panel">
-            <div class="settings-header"><div class="settings-title">棱台设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="prism_frustum">🔙</button><button class="settings-toggle-vis" data-panel="prism-frustum-settings-panel">显</button><button class="settings-close prism-frustum-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">棱台设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="prism_frustum">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="prism-frustum-settings-panel">显</button>
+                    <button class="settings-close prism-frustum-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="prism-frustum-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.001"><span>最大值</span><input type="number" class="max-val" step="0.001" value="10"></div>
             <div class="slider-controls">
@@ -430,9 +508,17 @@
                 <div class="slider-item"><div class="slider-label"><span>斜高 (Y)</span><input type="number" class="slider-input" id="prism-height-input" step="0.1" value="1.5"></div><div class="slider-container"><input type="range" class="slider" id="prism-height-slider" min="0.001" max="10" value="1.5" step="0.1"></div></div>
             </div>
         </div>
-        <!-- 平面 -->
+
+        <!-- 平面设置面板 -->
         <div class="settings-panel" id="plane-settings-panel">
-            <div class="settings-header"><div class="settings-title">平面设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="plane">🔙</button><button class="settings-toggle-vis" data-panel="plane-settings-panel">显</button><button class="settings-close plane-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">平面设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="plane">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="plane-settings-panel">显</button>
+                    <button class="settings-close plane-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="plane-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.001"><span>最大值</span><input type="number" class="max-val" step="0.001" value="10"></div>
             <div class="slider-controls">
@@ -440,9 +526,17 @@
                 <div class="slider-item"><div class="slider-label"><span>高 (Z)</span><input type="number" class="slider-input" id="plane-height-input" step="0.1" value="1.5"></div><div class="slider-container"><input type="range" class="slider" id="plane-height-slider" min="0.001" max="10" value="1.5" step="0.1"></div></div>
             </div>
         </div>
-        <!-- 圆管 -->
+
+        <!-- 圆管设置面板 -->
         <div class="settings-panel" id="pipe-settings-panel">
-            <div class="settings-header"><div class="settings-title">圆管设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="pipe">🔙</button><button class="settings-toggle-vis" data-panel="pipe-settings-panel">显</button><button class="settings-close pipe-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">圆管设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="pipe">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="pipe-settings-panel">显</button>
+                    <button class="settings-close pipe-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="pipe-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.01"><span>最大值</span><input type="number" class="max-val" step="0.001" value="5"></div>
             <div class="slider-controls">
@@ -451,9 +545,17 @@
                 <div class="slider-item"><div class="slider-label"><span>长度</span><input type="number" class="slider-input" id="pipe-length-input" step="0.05" value="2.00"></div><div class="slider-container"><input type="range" class="slider" id="pipe-length-slider" min="0.01" max="5" value="2.00" step="0.05"></div></div>
             </div>
         </div>
-        <!-- 方管 -->
+
+        <!-- 方管设置面板 -->
         <div class="settings-panel" id="square-tube-settings-panel">
-            <div class="settings-header"><div class="settings-title">方管设置</div><div style="display: flex; gap: 8px;"><button class="settings-reset" data-shape="square_tube">🔙</button><button class="settings-toggle-vis" data-panel="square-tube-settings-panel">显</button><button class="settings-close square-tube-close">✕</button></div></div>
+            <div class="settings-header">
+                <div class="settings-title">方管设置</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="settings-reset" data-shape="square_tube">🔙</button>
+                    <button class="settings-toggle-vis" data-panel="square-tube-settings-panel">显</button>
+                    <button class="settings-close square-tube-close">✕</button>
+                </div>
+            </div>
             <div class="units-control"><div class="units-label">units</div><select class="units-select" id="square-tube-units-select"><option value="10">10</option><option value="1" selected>1</option><option value="0.1">1/10</option></select></div>
             <div class="minmax-control"><span>最小值</span><input type="number" class="min-val" step="0.001" value="0.01"><span>最大值</span><input type="number" class="max-val" step="0.001" value="5"></div>
             <div class="slider-controls">
@@ -471,18 +573,105 @@
         点击场景中的物体以选择 <span id="pick-target-hint"></span>
     </div>
 
-    <!-- 仅包含所需库的 importmap -->
     <script type="importmap">
         {
             "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170/examples/jsm/",
-                "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.16.0/dist/lil-gui.esm.min.js",
-                "three-csg": "https://cdn.jsdelivr.net/npm/three-csg@2.0.0/build/three-csg.js"
+                "three": "https://unpkg.com/three@0.132.2/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.132.2/examples/jsm/",
+                "lil-gui": "https://unpkg.com/lil-gui@0.16.0/dist/lil-gui.esm.min.js"
             }
         }
     </script>
-
     <script type="module" src="script.js"></script>
+    <script>
+        // 互斥与基本显隐控制（不破坏原有模块功能）
+        (function() {
+            window.addEventListener('load', function() {
+                const bottomGroup = document.getElementById('bottom-group');
+                const topShapeContainer = document.getElementById('top-groups-container');
+                const styleToolsPanel = document.getElementById('style-tools-panel');
+                const buildToolsPanel = document.getElementById('build-tools-panel');
+                const scenePanel = document.getElementById('scene-settings-panel');
+
+                // 初始状态：形状按钮组隐藏，底部无选中（可设置默认）
+                topShapeContainer.style.display = 'none';
+
+                function clearBottomSelection() {
+                    bottomGroup.querySelectorAll('.btn-bottom').forEach(b => b.classList.remove('selected-bottom'));
+                }
+
+                function hideAllSecondary() {
+                    topShapeContainer.style.display = 'none';
+                    if (styleToolsPanel) styleToolsPanel.style.display = 'none';
+                    if (buildToolsPanel) buildToolsPanel.style.display = 'none';
+                    if (scenePanel) scenePanel.classList.remove('visible');
+                }
+
+                bottomGroup.addEventListener('click', function(e) {
+                    const btn = e.target.closest('.btn-bottom');
+                    if (!btn) return;
+                    if (btn.id === 'toggle-all-ui-btn') {
+                        // 全局显隐功能保持原样，这里不处理，由原script.js处理
+                        return;
+                    }
+                    const category = btn.dataset.category;
+                    clearBottomSelection();
+                    btn.classList.add('selected-bottom');
+                    hideAllSecondary();
+
+                    if (category === 'shape') {
+                        topShapeContainer.style.display = 'flex';
+                    } else if (category === 'perspective') {
+                        if (styleToolsPanel) styleToolsPanel.style.display = 'flex';
+                    } else if (category === 'build') {
+                        if (buildToolsPanel) buildToolsPanel.style.display = 'flex';
+                    } else if (category === 'scene') {
+                        if (scenePanel) scenePanel.classList.add('visible');
+                    } else if (category === 'storage') {
+                        alert('存储功能待开发');
+                    } else if (category === 'search') {
+                        alert('搜索功能待开发');
+                    }
+                });
+
+                // 顶部形状按钮事件（直接调用全局 switchToShape）
+                document.querySelectorAll('.btn-shape[data-shape]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const shape = this.dataset.shape;
+                        document.querySelectorAll('.btn-shape').forEach(b => b.classList.remove('selected-shape'));
+                        this.classList.add('selected-shape');
+                        if (typeof window.switchToShape === 'function') {
+                            window.switchToShape(shape);
+                        }
+                    });
+                });
+
+                // ❇️ 打开当前形状设置面板
+                const newSettingsBtn = document.getElementById('new-settings-btn');
+                if (newSettingsBtn) {
+                    newSettingsBtn.addEventListener('click', function() {
+                        const currentShape = window.currentShape;
+                        if (!currentShape) return;
+                        const panelId = (currentShape === 'frustum_cone' ? 'frustum' :
+                                        currentShape === 'prism_frustum' ? 'prism-frustum' :
+                                        currentShape === 'square_tube' ? 'square-tube' : currentShape) + '-settings-panel';
+                        const panel = document.getElementById(panelId);
+                        if (panel) panel.classList.toggle('visible');
+                    });
+                }
+
+                // 顶部⬅️➡️按钮保留原逻辑（原data-group事件由script.js处理，无需额外绑定）
+                // 重置按钮 ♊️ 调用全局重置函数
+                document.getElementById('btn-reset-global').addEventListener('click', function() {
+                    if (typeof window.resetAllGeometry === 'function') {
+                        window.resetAllGeometry();
+                    } else {
+                        // 备用：模拟原重置逻辑
+                        alert('重置所有几何体功能需要 script.js 中暴露 window.resetAllGeometry 函数。');
+                    }
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
