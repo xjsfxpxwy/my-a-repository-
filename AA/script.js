@@ -6,7 +6,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
 import GUI from 'lil-gui';
 
-// ========== earcut 三角剖分库（内联完整版） ==========
+// ========== earcut 三角剖分库（内联完整版）==========
 function earcut(data, holeIndices, dim) {
     dim = dim || 2;
     var hasHoles = holeIndices && holeIndices.length,
@@ -50,7 +50,8 @@ function linkedList(data, start, end, dim, clockwise) {
 function filterPoints(start, end) {
     if (!start) return start;
     if (!end) end = start;
-    var p = start, again;
+    var p = start,
+        again;
     do {
         again = false;
         if (!p.steiner && (equals(p, p.next) || area(p.prev, p, p.next) === 0)) {
@@ -101,7 +102,8 @@ function isEar(ear) {
     if (area(a, b, c) >= 0) return false;
     var p = ear.next.next;
     while (p !== ear.prev) {
-        if (pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) && area(p.prev, p, p.next) >= 0) return false;
+        if (pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
+            area(p.prev, p, p.next) >= 0) return false;
         p = p.next;
     }
     return true;
@@ -120,15 +122,21 @@ function isEarHashed(ear, minX, minY, invSize) {
         maxZ2 = Math.ceil((maxTY - minY) * invSize);
     var p = ear.prevZ, n = ear.nextZ;
     while (p && p.z >= minZ && n && n.z <= maxZ) {
-        if (p !== ear.prev && p !== ear.next && pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) && area(p.prev, p, p.next) >= 0) return false;
+        if (p !== ear.prev && p !== ear.next &&
+            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
+            area(p.prev, p, p.next) >= 0) return false;
         p = p.prevZ;
     }
     while (p && p.z >= minZ) {
-        if (p !== ear.prev && p !== ear.next && pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) && area(p.prev, p, p.next) >= 0) return false;
+        if (p !== ear.prev && p !== ear.next &&
+            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
+            area(p.prev, p, p.next) >= 0) return false;
         p = p.prevZ;
     }
     while (n && n.z <= maxZ) {
-        if (n !== ear.prev && n !== ear.next && pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, n.x, n.y) && area(n.prev, n, n.next) >= 0) return false;
+        if (n !== ear.prev && n !== ear.next &&
+            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, n.x, n.y) &&
+            area(n.prev, n, n.next) >= 0) return false;
         n = n.nextZ;
     }
     return true;
@@ -218,9 +226,11 @@ function findHoleBridge(hole, outerNode) {
     var stop = m, mx = m.x, my = m.y, tanMin = Infinity, tan;
     p = m;
     do {
-        if (hx >= p.x && p.x >= mx && hx !== p.x && pointInTriangle(hy < my ? hx : qx, hy, mx, my, hy < my ? qx : hx, hy, p.x, p.y)) {
+        if (hx >= p.x && p.x >= mx && hx !== p.x &&
+            pointInTriangle(hy < my ? hx : qx, hy, mx, my, hy < my ? qx : hx, hy, p.x, p.y)) {
             tan = Math.abs(hy - p.y) / (hx - p.x);
-            if (locallyInside(p, hole) && (tan < tanMin || (tan === tanMin && (p.x > m.x || (p.x === m.x && sectorContainsSector(m, p)))))) {
+            if (locallyInside(p, hole) &&
+                (tan < tanMin || (tan === tanMin && (p.x > m.x || (p.x === m.x && sectorContainsSector(m, p)))))) {
                 m = p;
                 tanMin = tan;
             }
@@ -248,7 +258,8 @@ function indexCurve(start, minX, minY, invSize) {
 }
 
 function sortLinked(list) {
-    var i, p, q, e, tail, numMerges, pSize, qSize, inSize = 1;
+    var i, p, q, e, tail, numMerges, pSize, qSize,
+        inSize = 1;
     do {
         p = list;
         list = null;
@@ -288,7 +299,17 @@ function sortLinked(list) {
 }
 
 function insertNode(i, x, y, last) {
-    var p = { i: i, x: x, y: y, prev: null, next: null, z: null, prevZ: null, nextZ: null, steiner: false };
+    var p = {
+        i: i,
+        x: x,
+        y: y,
+        prev: null,
+        next: null,
+        z: null,
+        prevZ: null,
+        nextZ: null,
+        steiner: false
+    };
     if (!last) {
         p.prev = p;
         p.next = p;
@@ -317,8 +338,14 @@ function signedArea(data, start, end, dim) {
     return sum;
 }
 
-function area(p, q, r) { return (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y); }
-function equals(p1, p2) { return p1.x === p2.x && p1.y === p2.y; }
+function area(p, q, r) {
+    return (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+}
+
+function equals(p1, p2) {
+    return p1.x === p2.x && p1.y === p2.y;
+}
+
 function intersects(p1, q1, p2, q2) {
     var o1 = sign(area(p1, q1, p2));
     var o2 = sign(area(p1, q1, q2));
@@ -331,49 +358,88 @@ function intersects(p1, q1, p2, q2) {
     if (o4 === 0 && onSegment(p2, q1, q2)) return true;
     return false;
 }
-function onSegment(p, q, r) { return q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) && q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y); }
-function sign(num) { return num > 0 ? 1 : num < 0 ? -1 : 0; }
+
+function onSegment(p, q, r) {
+    return q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) &&
+           q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y);
+}
+
+function sign(num) {
+    return num > 0 ? 1 : num < 0 ? -1 : 0;
+}
+
 function pointInTriangle(ax, ay, bx, by, cx, cy, px, py) {
     return (cx - px) * (ay - py) - (ax - px) * (cy - py) >= 0 &&
            (ax - px) * (by - py) - (bx - px) * (ay - py) >= 0 &&
            (bx - px) * (cy - py) - (cx - px) * (by - py) >= 0;
 }
+
 function isValidDiagonal(a, b) {
     return a.next.i !== b.i && a.prev.i !== b.i && !intersectsPolygon(a, b) &&
            (locallyInside(a, b) && locallyInside(b, a) && middleInside(a, b) &&
             (area(a.prev, a, b.prev) || area(a, b.prev, b)) || equals(a, b) && area(a.prev, a, a.next) > 0 && area(b.prev, b, b.next) > 0);
 }
+
 function locallyInside(a, b) {
-    return area(a.prev, a, a.next) < 0 ? area(a, b, a.next) >= 0 && area(a, a.prev, b) >= 0 : area(a, b, a.prev) < 0 || area(a, a.next, b) < 0;
+    return area(a.prev, a, a.next) < 0 ?
+        area(a, b, a.next) >= 0 && area(a, a.prev, b) >= 0 :
+        area(a, b, a.prev) < 0 || area(a, a.next, b) < 0;
 }
+
 function middleInside(a, b) {
-    var p = a, inside = false, px = (a.x + b.x) / 2, py = (a.y + b.y) / 2;
+    var p = a,
+        inside = false,
+        px = (a.x + b.x) / 2,
+        py = (a.y + b.y) / 2;
     do {
-        if (((p.y > py) !== (p.next.y > py)) && p.next.y !== p.y && (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x))
+        if (((p.y > py) !== (p.next.y > py)) && p.next.y !== p.y &&
+            (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x))
             inside = !inside;
         p = p.next;
     } while (p !== a);
     return inside;
 }
+
 function intersectsPolygon(a, b) {
     var p = a;
     do {
-        if (p.i !== a.i && p.next.i !== a.i && p.i !== b.i && p.next.i !== b.i && intersects(p, p.next, a, b)) return true;
+        if (p.i !== a.i && p.next.i !== a.i && p.i !== b.i && p.next.i !== b.i &&
+            intersects(p, p.next, a, b)) return true;
         p = p.next;
     } while (p !== a);
     return false;
 }
+
 function splitPolygon(a, b) {
-    var a2 = { i: a.i, x: a.x, y: a.y }, b2 = { i: b.i, x: b.x, y: b.y }, an = a.next, bp = b.prev;
-    a.next = b; b.prev = a; a2.next = an; an.prev = a2; b2.next = b2; b2.prev = b2; bp.next = a2; a2.prev = bp;
+    var a2 = { i: a.i, x: a.x, y: a.y },
+        b2 = { i: b.i, x: b.x, y: b.y },
+        an = a.next,
+        bp = b.prev;
+    a.next = b;
+    b.prev = a;
+    a2.next = an;
+    an.prev = a2;
+    b2.next = b2;
+    b2.prev = b2;
+    bp.next = a2;
+    a2.prev = bp;
     return b2;
 }
+
 function getLeftmost(start) {
-    var p = start, leftmost = start;
-    do { if (p.x < leftmost.x || (p.x === leftmost.x && p.y < leftmost.y)) leftmost = p; p = p.next; } while (p !== start);
+    var p = start,
+        leftmost = start;
+    do {
+        if (p.x < leftmost.x || (p.x === leftmost.x && p.y < leftmost.y))
+            leftmost = p;
+        p = p.next;
+    } while (p !== start);
     return leftmost;
 }
-function compareX(a, b) { return a.x - b.x; }
+
+function compareX(a, b) {
+    return a.x - b.x;
+}
 
 // ============ 默认参数 ============
 const DEFAULT_PARAMS = {
@@ -419,7 +485,7 @@ camera.lookAt(81000, 0, 0);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
@@ -500,7 +566,6 @@ updateAllLightPositions();
 let lightGui;
 const lightGuiContainer = document.getElementById('lighting-controls-container');
 function rebuildLightGUI() {
-    if (!lightGuiContainer) return;
     if(lightGui) lightGui.destroy();
     lightGui = new GUI({ container: lightGuiContainer, title:'光源参数' });
     lightGui.domElement.querySelector('.title')?.remove();
@@ -534,7 +599,7 @@ function getModelMeshes(model) { const meshes = []; model.traverse((child) => { 
 function createBrightMaterial(color, metalness=0.85, roughness=0.25, emissiveIntensity=0.1){ return new THREE.MeshStandardMaterial({color,metalness,roughness,side:THREE.DoubleSide,emissive:color,emissiveIntensity}); }
 function createTexturedMaterial(baseColor, texture){ if(texture&&texture.isTexture) return new THREE.MeshStandardMaterial({map:texture,metalness:0.7,roughness:0.3,side:THREE.DoubleSide,color:0xffffff}); return createBrightMaterial(baseColor); }
 
-// ========== 辅助几何体生成器 ==========
+// ========== 辅助几何体生成器（水密、单一 BufferGeometry） ==========
 function generateTubeGeometry(or,ir,h,rs=64){ 
     if(ir>=or) ir=or*0.98; if(ir<0.01) ir=0.01; or=Math.max(0.01,or); const hh=h/2, v=[], idx=[], n=[]; 
     function av(x,y,z,nx,ny,nz){ v.push(x,y,z); n.push(nx,ny,nz); return (v.length/3)-1; } 
@@ -557,14 +622,17 @@ function generateSquareTubeGeometry(ow, oh, iw, ih, len) {
         addTri(p1, p2, p3);
         addTri(p1, p3, p4);
     }
+    // 外表面
     addQuad(new THREE.Vector3(-hw, -hl, -hh), new THREE.Vector3( hw, -hl, -hh), new THREE.Vector3( hw,  hl, -hh), new THREE.Vector3(-hw,  hl, -hh), new THREE.Vector3(0,0,-1));
     addQuad(new THREE.Vector3( hw, -hl,  hh), new THREE.Vector3(-hw, -hl,  hh), new THREE.Vector3(-hw,  hl,  hh), new THREE.Vector3( hw,  hl,  hh), new THREE.Vector3(0,0,1));
     addQuad(new THREE.Vector3(-hw, -hl,  hh), new THREE.Vector3(-hw, -hl, -hh), new THREE.Vector3(-hw,  hl, -hh), new THREE.Vector3(-hw,  hl,  hh), new THREE.Vector3(-1,0,0));
     addQuad(new THREE.Vector3( hw, -hl, -hh), new THREE.Vector3( hw, -hl,  hh), new THREE.Vector3( hw,  hl,  hh), new THREE.Vector3( hw,  hl, -hh), new THREE.Vector3(1,0,0));
+    // 内表面法线指向内部
     addQuad(new THREE.Vector3( hiw, -hl, -hih), new THREE.Vector3(-hiw, -hl, -hih), new THREE.Vector3(-hiw,  hl, -hih), new THREE.Vector3( hiw,  hl, -hih), new THREE.Vector3(0,0,1));
     addQuad(new THREE.Vector3(-hiw, -hl,  hih), new THREE.Vector3( hiw, -hl,  hih), new THREE.Vector3( hiw,  hl,  hih), new THREE.Vector3(-hiw,  hl,  hih), new THREE.Vector3(0,0,-1));
     addQuad(new THREE.Vector3(-hiw, -hl, -hih), new THREE.Vector3(-hiw, -hl,  hih), new THREE.Vector3(-hiw,  hl,  hih), new THREE.Vector3(-hiw,  hl, -hih), new THREE.Vector3(1,0,0));
     addQuad(new THREE.Vector3( hiw, -hl,  hih), new THREE.Vector3( hiw, -hl, -hih), new THREE.Vector3( hiw,  hl, -hih), new THREE.Vector3( hiw,  hl,  hih), new THREE.Vector3(-1,0,0));
+    // 顶部和底部环面
     addQuad(new THREE.Vector3(-hw, hl, -hh), new THREE.Vector3( hw, hl, -hh), new THREE.Vector3( hiw, hl, -hih), new THREE.Vector3(-hiw, hl, -hih), new THREE.Vector3(0,1,0));
     addQuad(new THREE.Vector3( hw, hl,  hh), new THREE.Vector3(-hw, hl,  hh), new THREE.Vector3(-hiw, hl,  hih), new THREE.Vector3( hiw, hl,  hih), new THREE.Vector3(0,1,0));
     addQuad(new THREE.Vector3(-hw, hl,  hh), new THREE.Vector3(-hw, hl, -hh), new THREE.Vector3(-hiw, hl, -hih), new THREE.Vector3(-hiw, hl,  hih), new THREE.Vector3(0,1,0));
@@ -783,7 +851,6 @@ function createBasicCube(){
     return mesh;
 }
 
-// 注意：createPlaneModel 和 createSimplePlane 将在视频部分后定义，但它们引用的 planeOrientation 变量已提前声明
 function createPlaneModel() {
     const w = parseFloat(document.getElementById('plane-width-slider')?.value) || 1.5;
     const d = parseFloat(document.getElementById('plane-height-slider')?.value) || 1.5;
@@ -828,7 +895,6 @@ function createSimplePlane(width, depth, thickness = 0.01, color = 0xffdd44) {
     p.castShadow = true;
     return p;
 }
-
 // ========== CSG 引擎与依赖 ==========
 const _vec = new THREE.Vector3();
 const _tri = new THREE.Triangle();
@@ -1187,7 +1253,7 @@ const booleanState = {
 let boolTargetAModel = null;
 let boolToolBModel = null;
 let isPickingMode = false;
-let pickModeTarget = ''; // 'A' or 'B' or 'stack'
+let pickModeTarget = ''; // 'A' or 'B'
 let highlightedObject = null;
 let originalToolMaterial = null;
 
@@ -1238,8 +1304,7 @@ function enterPickMode(target) {
     const indicator = document.getElementById('pick-mode-indicator');
     if (indicator) {
         indicator.style.display = 'block';
-        const hint = document.getElementById('pick-target-hint');
-        if (hint) hint.textContent = target === 'A' ? '目标A' : (target === 'B' ? '工具B' : '堆栈目标');
+        document.getElementById('pick-target-hint').textContent = target === 'A' ? '目标A' : (target === 'B' ? '工具B' : '堆栈目标');
     }
     renderer.domElement.style.cursor = 'crosshair';
 }
@@ -1370,8 +1435,7 @@ function applyBooleanOperation() {
     resultMesh.position.copy(boolTargetAModel.position);
     scene.add(resultMesh);
     booleanState.opCount++;
-    const opCountEl = document.getElementById('bool-op-count');
-    if (opCountEl) opCountEl.textContent = `操作: ${booleanState.opCount} 次`;
+    document.getElementById('bool-op-count').textContent = `操作: ${booleanState.opCount} 次`;
     if (booleanState.previewMesh) {
         scene.remove(booleanState.previewMesh);
         booleanState.previewMesh = null;
@@ -1402,8 +1466,7 @@ const modifierStack = {
 
 function setStackTarget(obj) {
     modifierStack.targetObject = obj;
-    const nameEl = document.getElementById('stack-target-name');
-    if (nameEl) nameEl.textContent = obj ? (obj.userData.shape || obj.name || '未命名') : '无';
+    document.getElementById('stack-target-name').textContent = obj ? (obj.userData.shape || obj.name || '未命名') : '无';
     recalcStack();
 }
 
@@ -1543,7 +1606,7 @@ function getOpHint(op) {
     }[op] || '';
 }
 
-// ========== 布尔面板事件绑定（已修正 ID） ==========
+// ========== 布尔面板事件绑定 ==========
 function initBooleanPanelEvents() {
     if (document.getElementById('bool-op-grid')?.dataset.initialized) return;
     document.getElementById('bool-op-grid')?.setAttribute('data-initialized', 'true');
@@ -1553,32 +1616,66 @@ function initBooleanPanelEvents() {
             document.querySelectorAll('#bool-op-grid .op-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             booleanState.operation = btn.dataset.op;
-            const hint = document.getElementById('bool-result-hint');
-            if (hint) hint.textContent = getOpHint(booleanState.operation);
+            document.getElementById('bool-result-hint').textContent = getOpHint(booleanState.operation);
             updateBoolPreview();
         });
     });
 
-    document.getElementById('bool-add-target-a')?.addEventListener('click', () => enterPickMode('A'));
-    document.getElementById('bool-add-tool-b')?.addEventListener('click', () => enterPickMode('B'));
-    document.getElementById('bool-clear-a')?.addEventListener('click', () => {
+    document.getElementById('bool-pick-target-a').addEventListener('click', () => enterPickMode('A'));
+    document.getElementById('bool-pick-tool-b').addEventListener('click', () => enterPickMode('B'));
+    document.getElementById('bool-clear-target-a').addEventListener('click', () => {
         boolTargetAModel = null;
-        const status = document.getElementById('bool-target-a-status');
-        if (status) status.textContent = '未选择';
+        document.getElementById('bool-target-a-status').textContent = '未选择';
         updateBoolPreview();
     });
-    document.getElementById('bool-clear-b')?.addEventListener('click', () => {
+    document.getElementById('bool-clear-tool-b').addEventListener('click', () => {
         boolToolBModel = null;
-        const status = document.getElementById('bool-tool-b-status');
-        if (status) status.textContent = '未选择';
+        document.getElementById('bool-tool-b-status').textContent = '未选择';
         updateBoolPreview();
     });
 
-    document.getElementById('bool-apply-btn')?.addEventListener('click', () => {
+    document.getElementById('bool-preview-toggle').addEventListener('click', function() {
+        this.classList.toggle('active');
+        booleanState.previewEnabled = this.classList.contains('active');
+        updateBoolPreview();
+    });
+    document.getElementById('bool-wireframe-toggle').addEventListener('click', function() {
+        this.classList.toggle('active');
+        booleanState.wireframeEnabled = this.classList.contains('active');
+        if (booleanState.wireframeEnabled) booleanState.transparentB = false;
+        updateToolDisplayMode();
+    });
+    document.getElementById('bool-transparent-toggle').addEventListener('click', function() {
+        this.classList.toggle('active');
+        booleanState.transparentB = this.classList.contains('active');
+        if (booleanState.transparentB) booleanState.wireframeEnabled = false;
+        updateToolDisplayMode();
+    });
+    document.getElementById('bool-preview-color').addEventListener('input', updateBoolPreview);
+
+    document.getElementById('bool-tol-slider').addEventListener('input', function(e) {
+        const v = Math.pow(10, parseInt(e.target.value));
+        booleanState.tolerance = v;
+        document.getElementById('bool-tol-val').textContent = v.toExponential(0);
+    });
+    document.getElementById('bool-merge-verts').addEventListener('change', function(e) {
+        booleanState.mergeVertices = e.target.checked;
+    });
+
+    document.getElementById('bool-apply-btn').addEventListener('click', () => {
         if (applyBooleanOperation()) {
-            const status = document.getElementById('bool-status-text');
-            if (status) status.textContent = getOpName(booleanState.operation) + ' 完成';
+            document.getElementById('bool-status-text').textContent = getOpName(booleanState.operation) + ' 完成';
         }
+    });
+
+    document.getElementById('bool-add-to-stack-btn').addEventListener('click', () => {
+        if (!boolTargetAModel || !boolToolBModel) {
+            showError('请先选择目标A和工具B');
+            return;
+        }
+        setStackTarget(boolTargetAModel);
+        addModifierToStack(booleanState.operation, boolToolBModel);
+        document.getElementById('bool-status-text').textContent = '已添加到修改器堆栈';
     });
 }
 
@@ -1587,13 +1684,13 @@ function initModifierStackEvents() {
     if (document.getElementById('modifier-list-container')?.dataset.initialized) return;
     document.getElementById('modifier-list-container')?.setAttribute('data-initialized', 'true');
 
-    document.getElementById('stack-set-target-btn')?.addEventListener('click', () => enterPickMode('stack'));
-    document.getElementById('stack-clear-all-btn')?.addEventListener('click', () => {
+    document.getElementById('stack-set-target-btn').addEventListener('click', () => enterPickMode('stack'));
+    document.getElementById('stack-clear-all-btn').addEventListener('click', () => {
         modifierStack.modifiers = [];
         refreshModifierList();
         recalcStack();
     });
-    document.getElementById('stack-move-up')?.addEventListener('click', () => {
+    document.getElementById('stack-move-up').addEventListener('click', () => {
         if (modifierStack.selectedIndex > 0) {
             moveModifier(modifierStack.selectedIndex, modifierStack.selectedIndex - 1);
             modifierStack.selectedIndex--;
@@ -1601,7 +1698,7 @@ function initModifierStackEvents() {
             updateDependencyTree();
         }
     });
-    document.getElementById('stack-move-down')?.addEventListener('click', () => {
+    document.getElementById('stack-move-down').addEventListener('click', () => {
         if (modifierStack.selectedIndex < modifierStack.modifiers.length - 1) {
             moveModifier(modifierStack.selectedIndex, modifierStack.selectedIndex + 1);
             modifierStack.selectedIndex++;
@@ -1609,26 +1706,26 @@ function initModifierStackEvents() {
             updateDependencyTree();
         }
     });
-    document.getElementById('stack-toggle-modifier')?.addEventListener('click', () => {
+    document.getElementById('stack-toggle-modifier').addEventListener('click', () => {
         if (modifierStack.selectedIndex >= 0) {
             modifierStack.modifiers[modifierStack.selectedIndex].enabled = !modifierStack.modifiers[modifierStack.selectedIndex].enabled;
             refreshModifierList();
             recalcStack();
         }
     });
-    document.getElementById('stack-delete-modifier')?.addEventListener('click', () => {
+    document.getElementById('stack-delete-modifier').addEventListener('click', () => {
         if (modifierStack.selectedIndex >= 0) {
             removeModifierAt(modifierStack.selectedIndex);
         }
     });
-    document.getElementById('stack-auto-recalc')?.addEventListener('change', function(e) {
+    document.getElementById('stack-auto-recalc').addEventListener('change', function(e) {
         modifierStack.autoRecalc = e.target.checked;
     });
-    document.getElementById('stack-show-preview')?.addEventListener('change', function(e) {
+    document.getElementById('stack-show-preview').addEventListener('change', function(e) {
         modifierStack.showPreview = e.target.checked;
         recalcStack();
     });
-    document.getElementById('stack-recalc-now')?.addEventListener('click', recalcStack);
+    document.getElementById('stack-recalc-now').addEventListener('click', recalcStack);
 }
 
 // 全局点击拾取逻辑
@@ -1642,13 +1739,11 @@ renderer.domElement.addEventListener('click', (e) => {
         if (model && model.userData.shape) {
             if (pickModeTarget === 'A') {
                 boolTargetAModel = model;
-                const status = document.getElementById('bool-target-a-status');
-                if (status) status.textContent = getShapeDisplayName(model.userData.shape);
+                document.getElementById('bool-target-a-status').textContent = getShapeDisplayName(model.userData.shape);
                 updateBoolPreview();
             } else if (pickModeTarget === 'B') {
                 boolToolBModel = model;
-                const status = document.getElementById('bool-tool-b-status');
-                if (status) status.textContent = getShapeDisplayName(model.userData.shape);
+                document.getElementById('bool-tool-b-status').textContent = getShapeDisplayName(model.userData.shape);
                 updateBoolPreview();
             } else if (pickModeTarget === 'stack') {
                 setStackTarget(model);
@@ -2036,7 +2131,6 @@ function startInertiaAnimation() {
     }
     animate();
 }
-
 // ========== 视频纹理 UI 初始化 ==========
 function initVideoTextureControls() {
     const tabs = document.querySelectorAll('.video-tab');
@@ -2052,7 +2146,7 @@ function initVideoTextureControls() {
             const mode = tab.dataset.mode;
             currentVideoMode = mode;
             for (const [key, el] of Object.entries(contents)) {
-                if (el) el.style.display = (key === mode) ? 'block' : 'none';
+                el.style.display = (key === mode) ? 'block' : 'none';
             }
             if (currentShape === 'plane') {
                 updateModel('plane');
@@ -2060,14 +2154,14 @@ function initVideoTextureControls() {
         });
     });
 
-    document.getElementById('upload-horizontal-video')?.addEventListener('click', () => document.getElementById('hidden-video-horizontal-input')?.click());
-    document.getElementById('hidden-video-horizontal-input')?.addEventListener('change', function(e) {
+    document.getElementById('upload-horizontal-video').addEventListener('click', () => document.getElementById('hidden-video-horizontal-input').click());
+    document.getElementById('hidden-video-horizontal-input').addEventListener('change', function(e) {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
         horizontalVideos.forEach(item => { item.video.pause(); URL.revokeObjectURL(item.video.src); item.texture.dispose(); });
         horizontalVideos = [];
-        const autoPlay = document.getElementById('auto-play-horizontal')?.classList.contains('active');
-        const loop = document.getElementById('loop-horizontal')?.classList.contains('active');
+        const autoPlay = document.getElementById('auto-play-horizontal').classList.contains('active');
+        const loop = document.getElementById('loop-horizontal').classList.contains('active');
         files.forEach(file => {
             const v = document.createElement('video'); v.src = URL.createObjectURL(file); v.loop = loop; v.muted = true; v.playsInline = true; v.autoplay = autoPlay;
             if (autoPlay) v.play().catch(() => {});
@@ -2079,28 +2173,28 @@ function initVideoTextureControls() {
         }
         e.target.value = '';
     });
-    document.getElementById('delete-horizontal-video')?.addEventListener('click', () => {
+    document.getElementById('delete-horizontal-video').addEventListener('click', () => {
         horizontalVideos.forEach(item => { item.video.pause(); URL.revokeObjectURL(item.video.src); item.texture.dispose(); });
         horizontalVideos = [];
         if (currentShape === 'plane' && currentVideoMode === 'horizontal') {
             updateModel('plane');
         }
     });
-    document.getElementById('auto-play-horizontal')?.addEventListener('click', function() {
+    document.getElementById('auto-play-horizontal').addEventListener('click', function() {
         this.classList.toggle('active');
         const active = this.classList.contains('active');
         horizontalVideos.forEach(item => { item.video.autoplay = active; if (active) item.video.play().catch(() => {}); else item.video.pause(); });
     });
-    document.getElementById('loop-horizontal')?.addEventListener('click', function() { this.classList.toggle('active'); horizontalVideos.forEach(item => item.video.loop = this.classList.contains('active')); });
+    document.getElementById('loop-horizontal').addEventListener('click', function() { this.classList.toggle('active'); horizontalVideos.forEach(item => item.video.loop = this.classList.contains('active')); });
 
-    document.getElementById('upload-vertical-video')?.addEventListener('click', () => document.getElementById('hidden-video-vertical-input')?.click());
-    document.getElementById('hidden-video-vertical-input')?.addEventListener('change', function(e) {
+    document.getElementById('upload-vertical-video').addEventListener('click', () => document.getElementById('hidden-video-vertical-input').click());
+    document.getElementById('hidden-video-vertical-input').addEventListener('change', function(e) {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
         verticalVideos.forEach(item => { item.video.pause(); URL.revokeObjectURL(item.video.src); item.texture.dispose(); });
         verticalVideos = [];
-        const autoPlay = document.getElementById('auto-play-vertical')?.classList.contains('active');
-        const loop = document.getElementById('loop-vertical')?.classList.contains('active');
+        const autoPlay = document.getElementById('auto-play-vertical').classList.contains('active');
+        const loop = document.getElementById('loop-vertical').classList.contains('active');
         files.forEach(file => {
             const v = document.createElement('video'); v.src = URL.createObjectURL(file); v.loop = loop; v.muted = true; v.playsInline = true; v.autoplay = autoPlay;
             if (autoPlay) v.play().catch(() => {});
@@ -2112,26 +2206,26 @@ function initVideoTextureControls() {
         }
         e.target.value = '';
     });
-    document.getElementById('delete-vertical-video')?.addEventListener('click', () => {
+    document.getElementById('delete-vertical-video').addEventListener('click', () => {
         verticalVideos.forEach(item => { item.video.pause(); URL.revokeObjectURL(item.video.src); item.texture.dispose(); });
         verticalVideos = [];
         if (currentShape === 'plane' && currentVideoMode === 'vertical') {
             updateModel('plane');
         }
     });
-    document.getElementById('auto-play-vertical')?.addEventListener('click', function() {
+    document.getElementById('auto-play-vertical').addEventListener('click', function() {
         this.classList.toggle('active');
         const active = this.classList.contains('active');
         verticalVideos.forEach(item => { item.video.autoplay = active; if (active) item.video.play().catch(() => {}); else item.video.pause(); });
     });
-    document.getElementById('loop-vertical')?.addEventListener('click', function() { this.classList.toggle('active'); verticalVideos.forEach(item => item.video.loop = this.classList.contains('active')); });
+    document.getElementById('loop-vertical').addEventListener('click', function() { this.classList.toggle('active'); verticalVideos.forEach(item => item.video.loop = this.classList.contains('active')); });
 
     const dualUploadH = document.getElementById('upload-dual-horizontal');
-    if (dualUploadH) dualUploadH.textContent = '↔️';
-    dualUploadH?.addEventListener('click', () => document.getElementById('hidden-video-dual-horizontal-input')?.click());
-    document.getElementById('hidden-video-dual-horizontal-input')?.addEventListener('change', function(e) {
+    dualUploadH.textContent = '↔️';
+    dualUploadH.addEventListener('click', () => document.getElementById('hidden-video-dual-horizontal-input').click());
+    document.getElementById('hidden-video-dual-horizontal-input').addEventListener('change', function(e) {
         const file = e.target.files[0]; if (!file) return;
-        if (dualHorizontalVideo) { dualHorizontalVideo.pause(); URL.revokeObjectURL(dualHorizontalVideo.src); dualHorizontalTexture?.dispose(); }
+        if (dualHorizontalVideo) { dualHorizontalVideo.pause(); URL.revokeObjectURL(dualHorizontalVideo.src); dualHorizontalTexture.dispose(); }
         const v = document.createElement('video');
         v.src = URL.createObjectURL(file);
         v.loop = true; v.muted = true; v.playsInline = true; v.autoplay = false; v.preload = 'auto';
@@ -2158,11 +2252,11 @@ function initVideoTextureControls() {
     });
 
     const dualUploadV = document.getElementById('upload-dual-vertical');
-    if (dualUploadV) dualUploadV.textContent = '↕️';
-    dualUploadV?.addEventListener('click', () => document.getElementById('hidden-video-dual-vertical-input')?.click());
-    document.getElementById('hidden-video-dual-vertical-input')?.addEventListener('change', function(e) {
+    dualUploadV.textContent = '↕️';
+    dualUploadV.addEventListener('click', () => document.getElementById('hidden-video-dual-vertical-input').click());
+    document.getElementById('hidden-video-dual-vertical-input').addEventListener('change', function(e) {
         const file = e.target.files[0]; if (!file) return;
-        if (dualVerticalVideo) { dualVerticalVideo.pause(); URL.revokeObjectURL(dualVerticalVideo.src); dualVerticalTexture?.dispose(); }
+        if (dualVerticalVideo) { dualVerticalVideo.pause(); URL.revokeObjectURL(dualVerticalVideo.src); dualVerticalTexture.dispose(); }
         const v = document.createElement('video');
         v.src = URL.createObjectURL(file);
         v.loop = true; v.muted = true; v.playsInline = true; v.autoplay = false; v.preload = 'auto';
@@ -2187,6 +2281,7 @@ function initVideoTextureControls() {
         e.target.value = '';
     });
 
+    // 双向视频播放控制按钮
     const oldPlayBtn = document.getElementById('dual-play-pause');
     if (oldPlayBtn && oldPlayBtn.parentNode) {
         const parent = oldPlayBtn.parentNode;
@@ -2241,9 +2336,9 @@ function initVideoTextureControls() {
         });
     }
 
-    document.getElementById('delete-dual-videos')?.addEventListener('click', () => {
-        if (dualHorizontalVideo) { dualHorizontalVideo.pause(); URL.revokeObjectURL(dualHorizontalVideo.src); dualHorizontalTexture?.dispose(); dualHorizontalVideo = null; dualHorizontalTexture = null; }
-        if (dualVerticalVideo) { dualVerticalVideo.pause(); URL.revokeObjectURL(dualVerticalVideo.src); dualVerticalTexture?.dispose(); dualVerticalVideo = null; dualVerticalTexture = null; }
+    document.getElementById('delete-dual-videos').addEventListener('click', () => {
+        if (dualHorizontalVideo) { dualHorizontalVideo.pause(); URL.revokeObjectURL(dualHorizontalVideo.src); dualHorizontalTexture.dispose(); dualHorizontalVideo = null; dualHorizontalTexture = null; }
+        if (dualVerticalVideo) { dualVerticalVideo.pause(); URL.revokeObjectURL(dualVerticalVideo.src); dualVerticalTexture.dispose(); dualVerticalVideo = null; dualVerticalTexture = null; }
         isDualMode = false;
         if (currentShape === 'plane' && currentVideoMode === 'dual') {
             updateModel('plane');
@@ -2254,7 +2349,7 @@ function initVideoTextureControls() {
         if (vBtn) vBtn.textContent = '竖滑▶️';
     });
 
-    document.querySelector('.video-tab[data-mode="horizontal"]')?.click();
+    document.querySelector('.video-tab[data-mode="horizontal"]').click();
 }
 
 function updateDualPlayButtons() {
@@ -2423,11 +2518,10 @@ function switchToShape(shape){
             controls.update();
         }
     },30);
-    if(document.getElementById('texture-settings-panel')?.classList.contains('visible')) updateTexturePanelContent();
+    if(document.getElementById('texture-settings-panel').classList.contains('visible')) updateTexturePanelContent();
     refreshMaterialPanel();
     if (currentShape === 'plane') syncPlaneRotation();
-    // 形状切换时记录历史
-    historyManager.captureCurrentState();
+    if (window.syncInteractionButtons) syncInteractionButtons();
 }
 function getShapePanelId(shape){
     if (shape === 'frustum_cone') return 'frustum';
@@ -2462,7 +2556,7 @@ function updateTexturePanelContent(){
         if (contentArea) contentArea.style.display = 'flex';
         if (videoSection) videoSection.style.display = 'none';
         const def = shapeFacesDef[shape];
-        if (!def) { if(texturePanelContent) texturePanelContent.innerHTML = '<div style="text-align:center;padding:20px;">暂无纹理设置</div>'; return; }
+        if (!def) { texturePanelContent.innerHTML = '<div style="text-align:center;padding:20px;">暂无纹理设置</div>'; return; }
         const dn = getShapeDisplayName(shape);
         let html = `<div class="texture-shape-title">🟢 ${dn}</div>`;
         if (def.outer && def.outer.length) {
@@ -2484,11 +2578,11 @@ function updateTexturePanelContent(){
             html += '</div>';
         }
         html += '<div class="texture-bottom-actions"><button class="texture-action-btn" id="texture-upload-all-btn">⬆️ 上传所有面</button></div>';
-        if (texturePanelContent) texturePanelContent.innerHTML = html;
-        texturePanelContent?.querySelectorAll('.upload-face-btn').forEach(b => { b.addEventListener('click', e => { e.stopPropagation(); pendingTextureFace = b.dataset.face; hiddenFileInput?.click(); }); });
-        texturePanelContent?.querySelectorAll('.delete-face-btn').forEach(b => { b.addEventListener('click', e => { e.stopPropagation(); removeTextureForFace(currentShape, b.dataset.face); updateModel(currentShape); updateTexturePanelContent(); }); });
-        document.getElementById('texture-upload-all-btn')?.addEventListener('click', e => { e.stopPropagation(); pendingTextureFace = 'all'; hiddenFileInput?.click(); });
-        texturePanelContent?.querySelectorAll('.video-play-btn').forEach(b => { b.addEventListener('click', e => { e.stopPropagation(); const tex = getTextureForFace(currentShape, b.dataset.face); if (tex && tex.isVideoTexture) { const video = tex.image; if (video) { if (video.paused) video.play().catch(()=>{}); else video.pause(); updateTexturePanelContent(); } } }); });
+        texturePanelContent.innerHTML = html;
+        texturePanelContent.querySelectorAll('.upload-face-btn').forEach(b => { b.addEventListener('click', e => { e.stopPropagation(); pendingTextureFace = b.dataset.face; hiddenFileInput.click(); }); });
+        texturePanelContent.querySelectorAll('.delete-face-btn').forEach(b => { b.addEventListener('click', e => { e.stopPropagation(); removeTextureForFace(currentShape, b.dataset.face); updateModel(currentShape); updateTexturePanelContent(); }); });
+        document.getElementById('texture-upload-all-btn')?.addEventListener('click', e => { e.stopPropagation(); pendingTextureFace = 'all'; hiddenFileInput.click(); });
+        texturePanelContent.querySelectorAll('.video-play-btn').forEach(b => { b.addEventListener('click', e => { e.stopPropagation(); const tex = getTextureForFace(currentShape, b.dataset.face); if (tex && tex.isVideoTexture) { const video = tex.image; if (video) { if (video.paused) video.play().catch(()=>{}); else video.pause(); updateTexturePanelContent(); } } }); });
     }
 }
 function createMediaTexture(file,cb){
@@ -2505,7 +2599,7 @@ function createMediaTexture(file,cb){
         }; r.readAsDataURL(file);
     }
 }
-hiddenFileInput?.addEventListener('change',()=>{
+hiddenFileInput.addEventListener('change',()=>{
     const file=hiddenFileInput.files[0];
     if(!file||!pendingTextureFace){ hiddenFileInput.value=''; return; }
     createMediaTexture(file,tex=>{
@@ -2514,8 +2608,8 @@ hiddenFileInput?.addEventListener('change',()=>{
         updateModel(currentShape); updateTexturePanelContent(); pendingTextureFace=null; hiddenFileInput.value='';
     });
 });
-document.getElementById('texture-panel-close-btn')?.addEventListener('click',()=>{
-    texturePanel?.classList.remove('visible');
+document.getElementById('texture-panel-close-btn').addEventListener('click',()=>{
+    texturePanel.classList.remove('visible');
     document.getElementById('texture-tool-btn')?.classList.remove('texture-active');
 });
 
@@ -2553,47 +2647,263 @@ function buildCameraPanel() {
     bindOff('cam-offset-x-slider', 'cam-offset-x-input', 'x');
     bindOff('cam-offset-y-slider', 'cam-offset-y-input', 'y');
     bindOff('cam-offset-z-slider', 'cam-offset-z-input', 'z');
-    // ... 其余相机面板代码与原来完全一致，此处省略以节省篇幅，但实际文件中需完整保留 ...
+    const mp = document.getElementById('mode-persp'), mo = document.getElementById('mode-ortho'),
+          pc = document.getElementById('persp-controls'), oc = document.getElementById('ortho-controls'),
+          fs = document.getElementById('fov-slider'), fi = document.getElementById('fov-input'),
+          oss = document.getElementById('ortho-size-slider'), osi = document.getElementById('ortho-size-input'),
+          nc = document.getElementById('near-clip'), fc = document.getElementById('far-clip');
+    mp.addEventListener('click', () => { mp.classList.add('active'); mo.classList.remove('active'); pc.style.display = 'block'; oc.style.display = 'none'; window.applyProjection(); });
+    mo.addEventListener('click', () => { mo.classList.add('active'); mp.classList.remove('active'); pc.style.display = 'none'; oc.style.display = 'block'; window.applyProjection(); });
+    window.applyProjection = function () {
+        const aspect = window.innerWidth / window.innerHeight,
+              near = parseFloat(nc.value) || 0.1,
+              far = parseFloat(fc.value) || 1000;
+        if (mp.classList.contains('active')) {
+            const fov = parseFloat(fs.value) || 42;
+            if (!(camera instanceof THREE.PerspectiveCamera)) {
+                const pos = camera.position.clone(), t = controls.target.clone();
+                camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+                camera.position.copy(pos);
+                controls.object = camera;
+                controls.target.copy(t);
+            } else {
+                camera.fov = fov;
+                camera.aspect = aspect;
+                camera.near = near;
+                camera.far = far;
+                camera.updateProjectionMatrix();
+            }
+        } else {
+            const size = parseFloat(oss.value) || 5;
+            const hw = size * aspect, hh = size;
+            if (!(camera instanceof THREE.OrthographicCamera)) {
+                const pos = camera.position.clone(), t = controls.target.clone();
+                camera = new THREE.OrthographicCamera(-hw, hw, hh, -hh, near, far);
+                camera.position.copy(pos);
+                controls.object = camera;
+                controls.target.copy(t);
+            } else {
+                camera.left = -hw; camera.right = hw; camera.top = hh; camera.bottom = -hh;
+                camera.near = near; camera.far = far; camera.updateProjectionMatrix();
+            }
+        }
+        controls.update();
+    };
+    fs.addEventListener('input', () => { fi.value = fs.value; window.applyProjection(); });
+    fi.addEventListener('change', () => { let v = parseFloat(fi.value); v = Math.min(179, Math.max(1, v)); fs.value = v; window.applyProjection(); });
+    oss.addEventListener('input', () => { osi.value = oss.value; window.applyProjection(); });
+    osi.addEventListener('change', () => { let v = parseFloat(osi.value); v = Math.min(100, Math.max(0.1, v)); oss.value = v; window.applyProjection(); });
+    nc.addEventListener('change', window.applyProjection);
+    fc.addEventListener('change', window.applyProjection);
     cameraPanelBuilt = true;
     syncCameraFromOffset();
 }
 
 // ========== 注入坐标与旋转控件 ==========
-// 与原代码完全相同，此处省略，保证完整请复制原有 injectCoordAndRotateControls 函数体
 function injectCoordAndRotateControls() {
-    // 原有完整代码 ...
+    const shapePanels = ['sphere', 'cylinder', 'cone', 'frustum', 'torus', 'pipe', 'cube', 'square-tube', 'pyramid', 'prism-frustum', 'plane'];
+    shapePanels.forEach(shapeId => {
+        const panel = document.getElementById(`${shapeId}-settings-panel`);
+        if (!panel) return;
+        if (panel.querySelector('.coord-rotate-wrapper')) return;
+        let shapeKey = shapeId;
+        if (shapeId === 'frustum') shapeKey = 'frustum_cone';
+        else if (shapeId === 'prism-frustum') shapeKey = 'prism_frustum';
+        else if (shapeId === 'square-tube') shapeKey = 'square_tube';
+        const prefix = shapeKey + '-';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'coord-rotate-wrapper';
+        let innerHTML = `
+            <div class="control-group" style="margin-top:12px;">
+                <div class="control-title">模型坐标</div>
+                <div class="control-row"><span class="control-label">X</span><input type="number" id="pos-x-${shapeKey}" class="coord-input" step="1" value="0"></div>
+                <div class="control-row"><span class="control-label">Y</span><input type="number" id="pos-y-${shapeKey}" class="coord-input" step="1" value="0"></div>
+                <div class="control-row"><span class="control-label">Z</span><input type="number" id="pos-z-${shapeKey}" class="coord-input" step="1" value="0"></div>
+            </div>
+        `;
+        if (shapeKey === 'plane') {
+            innerHTML += `
+            <div class="control-group" id="plane-orientation-group">
+                <div class="control-title">平面朝向</div>
+                <div class="control-row" style="display:flex; gap:6px;">
+                    <button class="toggle-btn orientation-btn" data-orient="front">平面朝前</button>
+                    <button class="toggle-btn orientation-btn" data-orient="up">平面朝上</button>
+                    <button class="toggle-btn orientation-btn" data-orient="left">平面朝左</button>
+                </div>
+            </div>
+            `;
+        }
+        innerHTML += `
+            <div class="control-group">
+                <div class="control-title">旋转</div>
+                <div class="control-row"><button class="toggle-btn" id="${prefix}toggle-x">绕X轴旋转</button></div>
+                <div class="speed-control"><span>转/分</span><input type="number" id="${prefix}speed-x" class="speed-input" value="2.0" step="0.5" min="0.1" max="30"><button class="dir-btn" id="${prefix}dir-x">正转</button></div>
+                <div class="control-row" style="margin-top:6px;"><button class="toggle-btn" id="${prefix}toggle-y">绕Y轴旋转</button></div>
+                <div class="speed-control"><span>转/分</span><input type="number" id="${prefix}speed-y" class="speed-input" value="2.0" step="0.5" min="0.1" max="30"><button class="dir-btn" id="${prefix}dir-y">正转</button></div>
+                <div class="control-row" style="margin-top:6px;"><button class="toggle-btn" id="${prefix}toggle-z">绕Z轴旋转</button></div>
+                <div class="speed-control"><span>转/分</span><input type="number" id="${prefix}speed-z" class="speed-input" value="2.0" step="0.5" min="0.1" max="30"><button class="dir-btn" id="${prefix}dir-z">正转</button></div>
+            </div>
+            <div class="control-group">
+                <div class="control-title">挪移</div>
+                <div class="control-row"><button class="toggle-btn" id="${prefix}nudge-on-btn">挪移</button><button class="toggle-btn active" id="${prefix}nudge-off-btn">静止</button></div>
+            </div>
+            <div class="control-group">
+                <div class="control-title">滑动</div>
+                <div class="control-row"><button class="toggle-btn active" id="${prefix}slide-on-btn">滑动</button><button class="toggle-btn" id="${prefix}slide-off-btn">静止</button></div>
+            </div>
+            <div class="control-group">
+                <div class="control-title">缩放</div>
+                <div class="control-row"><button class="toggle-btn active" id="${prefix}zoom-on-btn">缩放</button><button class="toggle-btn" id="${prefix}zoom-off-btn">静止</button></div>
+            </div>
+        `;
+        wrapper.innerHTML = innerHTML;
+        panel.appendChild(wrapper);
+        const px = wrapper.querySelector(`#pos-x-${shapeKey}`);
+        const py = wrapper.querySelector(`#pos-y-${shapeKey}`);
+        const pz = wrapper.querySelector(`#pos-z-${shapeKey}`);
+        const applyPos = () => {
+            if (currentShape !== shapeKey || !currentModel) return;
+            const x = parseFloat(px.value) || 0;
+            const y = parseFloat(py.value) || 0;
+            const z = parseFloat(pz.value) || 0;
+            currentModel.position.set(x, y, z);
+            controls.target.set(x, y, z);
+            syncCameraFromOffset();
+        };
+        px.addEventListener('input', applyPos);
+        py.addEventListener('input', applyPos);
+        pz.addEventListener('input', applyPos);
+        ['x','y','z'].forEach(axis => {
+            const tb = document.getElementById(`${prefix}toggle-${axis}`);
+            const si = document.getElementById(`${prefix}speed-${axis}`);
+            const db = document.getElementById(`${prefix}dir-${axis}`);
+            const axisName = axis.toUpperCase();
+            if (tb) {
+                tb.addEventListener('click', () => {
+                    const meta = getMetaForShape(shapeKey);
+                    meta.autoRotate[axis] = !meta.autoRotate[axis];
+                    tb.classList.toggle('active', meta.autoRotate[axis]);
+                    tb.textContent = meta.autoRotate[axis] ? `绕${axisName}轴旋转中` : `绕${axisName}轴旋转`;
+                });
+            }
+            if (si) {
+                si.addEventListener('input', () => {
+                    const meta = getMetaForShape(shapeKey);
+                    meta.rotateSpeed[axis] = parseFloat(si.value) || 2;
+                });
+            }
+            if (db) {
+                db.addEventListener('click', () => {
+                    const meta = getMetaForShape(shapeKey);
+                    meta.rotateDir[axis] *= -1;
+                    db.textContent = meta.rotateDir[axis] === 1 ? '正转' : '反转';
+                });
+            }
+        });
+        const setInteract = (type, active) => {
+            const onBtn = document.getElementById(`${prefix}${type}-on-btn`);
+            const offBtn = document.getElementById(`${prefix}${type}-off-btn`);
+            if (!onBtn || !offBtn) return;
+            onBtn.classList.toggle('active', active);
+            offBtn.classList.toggle('active', !active);
+            if (currentShape === shapeKey) {
+                switch (type) {
+                    case 'nudge': controls.enablePan = active; break;
+                    case 'slide': controls.enableRotate = active; break;
+                    case 'zoom': controls.enableZoom = active; break;
+                }
+            }
+        };
+        document.getElementById(`${prefix}nudge-on-btn`).addEventListener('click', () => setInteract('nudge', true));
+        document.getElementById(`${prefix}nudge-off-btn`).addEventListener('click', () => setInteract('nudge', false));
+        document.getElementById(`${prefix}slide-on-btn`).addEventListener('click', () => setInteract('slide', true));
+        document.getElementById(`${prefix}slide-off-btn`).addEventListener('click', () => setInteract('slide', false));
+        document.getElementById(`${prefix}zoom-on-btn`).addEventListener('click', () => setInteract('zoom', true));
+        document.getElementById(`${prefix}zoom-off-btn`).addEventListener('click', () => setInteract('zoom', false));
+        if (shapeKey === 'plane') {
+            const orientBtns = wrapper.querySelectorAll('.orientation-btn');
+            function setOrientationActive(orient) {
+                orientBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.orient === orient);
+                });
+            }
+            setOrientationActive(planeOrientation);
+            orientBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const newOrient = btn.dataset.orient;
+                    if (planeOrientation === newOrient) return;
+                    planeOrientation = newOrient;
+                    setOrientationActive(newOrient);
+                    if (currentShape === 'plane') {
+                        updateModel('plane');
+                        syncPlaneRotation();
+                    }
+                });
+            });
+        }
+    });
+
+    window.syncInteractionButtons = function() {
+        const prefix = currentShape + '-';
+        const setInteract = (type, active) => {
+            const onBtn = document.getElementById(`${prefix}${type}-on-btn`);
+            const offBtn = document.getElementById(`${prefix}${type}-off-btn`);
+            if (onBtn) onBtn.classList.toggle('active', active);
+            if (offBtn) offBtn.classList.toggle('active', !active);
+        };
+        setInteract('nudge', controls.enablePan);
+        setInteract('slide', controls.enableRotate);
+        setInteract('zoom', controls.enableZoom);
+    };
+    window.syncInteractionButtons();
 }
 
 // ========== 材质面板 ==========
 function buildMaterialPanel() {
-    // 原有完整代码 ...
+    const cont = document.getElementById('material-controls-container');
+    cont.innerHTML = `<div class="control-group"><div class="control-title">材质类型</div><div class="control-row"><label class="radio-option"><input type="radio" name="mat-type" value="basic"> Basic</label><label class="radio-option"><input type="radio" name="mat-type" value="standard" checked> Standard</label><label class="radio-option"><input type="radio" name="mat-type" value="physical"> Physical</label></div></div><div class="control-group"><div class="control-title">基础属性</div><div class="control-row"><span class="control-label">基础色</span><input type="color" id="mat-color" value="#ff6600"><span id="mat-color-val">#ff6600</span></div><div class="control-row"><span class="control-label">金属度</span><input type="range" id="mat-metalness" min="0" max="1" value="0.78" step="0.01"><span class="slider-value" id="mat-metalness-val">0.78</span></div><div class="control-row"><span class="control-label">粗糙度</span><input type="range" id="mat-roughness" min="0" max="1" value="0.22" step="0.01"><span class="slider-value" id="mat-roughness-val">0.22</span></div><div class="control-row"><span class="control-label">自发光色</span><input type="color" id="mat-emissive" value="#000000"><span id="mat-emissive-val">#000000</span></div><div class="control-row"><span class="control-label">自发光强度</span><input type="range" id="mat-emissive-intensity" min="0" max="2" value="0.1" step="0.05"><span class="slider-value" id="mat-emissive-intensity-val">0.10</span></div><div class="control-row"><span class="control-label">启用透明</span><input type="checkbox" id="mat-transparent"><span style="font-size:0.8rem;">(透明/半透明请启用)</span></div><div class="control-row"><span class="control-label">透明度</span><input type="range" id="mat-opacity" min="0" max="1" value="0.18" step="0.01"><span class="slider-value" id="mat-opacity-val">0.18</span></div></div><div class="control-group"><div class="control-title">纹理贴图</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"><div><button class="texture-ctrl-btn" id="mat-diffuse-upload">漫反射</button><button class="texture-ctrl-btn clear-btn" id="mat-diffuse-clear">✕</button></div><div><button class="texture-ctrl-btn" id="mat-metalrough-upload">金属/粗糙</button><button class="texture-ctrl-btn clear-btn" id="mat-metalrough-clear">✕</button></div><div><button class="texture-ctrl-btn" id="mat-normal-upload">法线</button><button class="texture-ctrl-btn clear-btn" id="mat-normal-clear">✕</button></div><div><button class="texture-ctrl-btn" id="mat-emissive-upload">自发光</button><button class="texture-ctrl-btn clear-btn" id="mat-emissive-clear">✕</button></div></div></div><div class="control-group"><div class="control-title">纹理变换</div><div class="control-row"><span class="control-label">重复UV</span><input type="number" id="tex-repeat-u" class="coord-input" value="1" step="0.01"><input type="number" id="tex-repeat-v" class="coord-input" value="1" step="0.01"></div><div class="control-row"><span class="control-label">偏移UV</span><input type="number" id="tex-offset-u" class="coord-input" value="0" step="0.01"><input type="number" id="tex-offset-v" class="coord-input" value="0" step="0.01"></div><div class="control-row"><span class="control-label">旋转</span><input type="number" id="tex-rotation" class="coord-input" value="0" step="0.01"></div></div><div class="control-group"><div class="control-title">快速预设</div><div class="preset-grid"><button class="preset-btn" data-mat-preset="metal">金属</button><button class="preset-btn" data-mat-preset="plastic">塑料</button><button class="preset-btn" data-mat-preset="rubber">橡胶</button><button class="preset-btn" data-mat-preset="glass">玻璃</button><button class="preset-btn" data-mat-preset="emissive">发光</button></div></div>`;
+    function applyTexTransform() { const ru=parseFloat(document.getElementById('tex-repeat-u').value)||1, rv=parseFloat(document.getElementById('tex-repeat-v').value)||1, ou=parseFloat(document.getElementById('tex-offset-u').value)||0, ov=parseFloat(document.getElementById('tex-offset-v').value)||0, rot=parseFloat(document.getElementById('tex-rotation').value)||0; Object.values(materialTextures).forEach(tex=>{ if(tex){ tex.repeat.set(ru,rv); tex.offset.set(ou,ov); tex.rotation=rot; tex.needsUpdate=true; } }); Object.values(textureStore).forEach(tex=>{ if(tex&&tex.isTexture){ tex.repeat.set(ru,rv); tex.offset.set(ou,ov); tex.rotation=rot; tex.needsUpdate=true; } }); }
+    document.getElementById('tex-repeat-u').addEventListener('input',applyTexTransform); document.getElementById('tex-repeat-v').addEventListener('input',applyTexTransform);
+    document.getElementById('tex-offset-u').addEventListener('input',applyTexTransform); document.getElementById('tex-offset-v').addEventListener('input',applyTexTransform);
+    document.getElementById('tex-rotation').addEventListener('input',applyTexTransform);
+    function applyMatFromUI() { if(!currentModel)return; const color=document.getElementById('mat-color').value, metalness=parseFloat(document.getElementById('mat-metalness').value), roughness=parseFloat(document.getElementById('mat-roughness').value), emissive=document.getElementById('mat-emissive').value, emissiveIntensity=parseFloat(document.getElementById('mat-emissive-intensity').value), transparent=document.getElementById('mat-transparent').checked, transparency=parseFloat(document.getElementById('mat-opacity').value), type=document.querySelector('input[name="mat-type"]:checked')?.value||'standard', opacity = transparent ? (1 - transparency) : 1.0; const params={color:new THREE.Color(color),metalness,roughness,emissive:new THREE.Color(emissive),emissiveIntensity,side:THREE.DoubleSide,transparent,opacity}; if(type==='physical'){ params.clearcoat=0.5; params.clearcoatRoughness=0.1; } if(type==='basic'){ delete params.metalness; delete params.roughness; delete params.emissiveIntensity; } if(materialTextures.diffuse) params.map=materialTextures.diffuse; if(materialTextures.normal&&type!=='basic') params.normalMap=materialTextures.normal; if(materialTextures.emissive) params.emissiveMap=materialTextures.emissive; if(materialTextures.metalRough&&type!=='basic'){ params.metalnessMap=materialTextures.metalRough; params.roughnessMap=materialTextures.metalRough; } const MatClass=type==='basic'?THREE.MeshBasicMaterial:type==='physical'?THREE.MeshPhysicalMaterial:THREE.MeshStandardMaterial; const newMat=new MatClass(params); const oldMat=currentModel.material; if(Array.isArray(currentModel.material)) currentModel.material=newMat; else if(currentModel.isGroup) currentModel.children.forEach(c=>{ if(c.material){ c.material.dispose(); c.material=newMat.clone(); } }); else currentModel.material=newMat; if(oldMat&&oldMat!==newMat) oldMat.dispose(); }
+    document.getElementById('mat-color').addEventListener('input',function(){ document.getElementById('mat-color-val').textContent=this.value; applyMatFromUI(); });
+    document.getElementById('mat-metalness').addEventListener('input',function(){ document.getElementById('mat-metalness-val').textContent=parseFloat(this.value).toFixed(2); applyMatFromUI(); });
+    document.getElementById('mat-roughness').addEventListener('input',function(){ document.getElementById('mat-roughness-val').textContent=parseFloat(this.value).toFixed(2); applyMatFromUI(); });
+    document.getElementById('mat-emissive').addEventListener('input',function(){ document.getElementById('mat-emissive-val').textContent=this.value; applyMatFromUI(); });
+    document.getElementById('mat-emissive-intensity').addEventListener('input',function(){ document.getElementById('mat-emissive-intensity-val').textContent=parseFloat(this.value).toFixed(2); applyMatFromUI(); });
+    document.getElementById('mat-transparent').addEventListener('change',applyMatFromUI);
+    document.getElementById('mat-opacity').addEventListener('input',function(){ document.getElementById('mat-opacity-val').textContent=parseFloat(this.value).toFixed(2); applyMatFromUI(); });
+    document.querySelectorAll('input[name="mat-type"]').forEach(r=>r.addEventListener('change',applyMatFromUI));
+    function setupMatTex(bid,cbid,key,fid){ document.getElementById(bid).addEventListener('click',()=>document.getElementById(fid).click()); document.getElementById(cbid).addEventListener('click',()=>{ if(materialTextures[key]){ if(materialTextures[key].isVideoTexture){ const v=materialTextures[key].image||materialTextures[key].source; if(v&&v.pause){ v.pause(); v.removeAttribute('src'); v.load(); } } materialTextures[key].dispose(); materialTextures[key]=null; } applyMatFromUI(); }); }
+    setupMatTex('mat-diffuse-upload','mat-diffuse-clear','diffuse','hidden-mat-diffuse-input');
+    setupMatTex('mat-metalrough-upload','mat-metalrough-clear','metalRough','hidden-mat-metalrough-input');
+    setupMatTex('mat-normal-upload','mat-normal-clear','normal','hidden-mat-normal-input');
+    setupMatTex('mat-emissive-upload','mat-emissive-clear','emissive','hidden-mat-emissive-input');
+    function loadMatTex(fid,key){ const inp=document.getElementById(fid); inp.addEventListener('change',()=>{ const file=inp.files[0]; if(!file)return; createMediaTexture(file,tex=>{ tex.repeat.set(parseFloat(document.getElementById('tex-repeat-u').value)||1,parseFloat(document.getElementById('tex-repeat-v').value)||1); tex.offset.set(parseFloat(document.getElementById('tex-offset-u').value)||0,parseFloat(document.getElementById('tex-offset-v').value)||0); tex.rotation=parseFloat(document.getElementById('tex-rotation').value)||0; tex.needsUpdate=true; if(materialTextures[key]){ if(materialTextures[key].isVideoTexture){ const v=materialTextures[key].image||materialTextures[key].source; if(v&&v.pause){ v.pause(); v.removeAttribute('src'); v.load(); } } materialTextures[key].dispose(); } materialTextures[key]=tex; applyMatFromUI(); inp.value=''; }); }); }
+    loadMatTex('hidden-mat-diffuse-input','diffuse'); loadMatTex('hidden-mat-metalrough-input','metalRough'); loadMatTex('hidden-mat-normal-input','normal'); loadMatTex('hidden-mat-emissive-input','emissive');
+    document.querySelectorAll('.preset-btn[data-mat-preset]').forEach(b=>{ b.addEventListener('click',()=>{ const presets={metal:{color:'#c0c0c0',metalness:1.0,roughness:0.2,emissive:'#000000',emissiveIntensity:0,transparency:0.18},plastic:{color:'#e8e8e8',metalness:0.0,roughness:0.3,emissive:'#000000',emissiveIntensity:0,transparency:0.18},rubber:{color:'#333333',metalness:0.0,roughness:0.9,emissive:'#000000',emissiveIntensity:0,transparency:0.18},glass:{color:'#ddeeff',metalness:0.1,roughness:0.05,emissive:'#000000',emissiveIntensity:0,transparency:0.5},emissive:{color:'#ff6600',metalness:0.5,roughness:0.3,emissive:'#ff4400',emissiveIntensity:1.5,transparency:0.18}}; const p=presets[b.dataset.matPreset]; if(!p)return; document.getElementById('mat-color').value=p.color; document.getElementById('mat-color-val').textContent=p.color; document.getElementById('mat-metalness').value=p.metalness; document.getElementById('mat-metalness-val').textContent=p.metalness.toFixed(2); document.getElementById('mat-roughness').value=p.roughness; document.getElementById('mat-roughness-val').textContent=p.roughness.toFixed(2); document.getElementById('mat-emissive').value=p.emissive; document.getElementById('mat-emissive-val').textContent=p.emissive; document.getElementById('mat-emissive-intensity').value=p.emissiveIntensity; document.getElementById('mat-emissive-intensity-val').textContent=p.emissiveIntensity.toFixed(2); document.getElementById('mat-opacity').value=p.transparency; document.getElementById('mat-opacity-val').textContent=p.transparency.toFixed(2); document.querySelectorAll('.preset-btn[data-mat-preset]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); document.querySelector('input[name="mat-type"][value="standard"]').checked=true; applyMatFromUI(); }); });
+    refreshMaterialPanel();
 }
-function refreshMaterialPanel(){
-    // 原有完整代码 ...
-}
+function refreshMaterialPanel(){ if(!currentModel||!currentModel.material)return; const mat=currentModel.material; if(mat.color&&document.getElementById('mat-color')){ document.getElementById('mat-color').value='#'+mat.color.getHexString(); document.getElementById('mat-color-val').textContent='#'+mat.color.getHexString(); } if(mat.metalness!==undefined){ const s=document.getElementById('mat-metalness'),v=document.getElementById('mat-metalness-val'); if(s&&v){ s.value=mat.metalness; v.textContent=mat.metalness.toFixed(2); } } if(mat.roughness!==undefined){ const s=document.getElementById('mat-roughness'),v=document.getElementById('mat-roughness-val'); if(s&&v){ s.value=mat.roughness; v.textContent=mat.roughness.toFixed(2); } } if(mat.emissive&&document.getElementById('mat-emissive')){ document.getElementById('mat-emissive').value='#'+mat.emissive.getHexString(); document.getElementById('mat-emissive-val').textContent='#'+mat.emissive.getHexString(); } if(mat.emissiveIntensity!==undefined){ const s=document.getElementById('mat-emissive-intensity'),v=document.getElementById('mat-emissive-intensity-val'); if(s&&v){ s.value=mat.emissiveIntensity; v.textContent=mat.emissiveIntensity.toFixed(2); } } const tc=document.getElementById('mat-transparent'),os=document.getElementById('mat-opacity'),ov=document.getElementById('mat-opacity-val'); if(tc&&os&&ov){ tc.checked=!!mat.transparent; const curTransparency = mat.transparent ? (1 - mat.opacity) : 0.18; os.value=curTransparency; ov.textContent=curTransparency.toFixed(2); } const type=mat.isMeshBasicMaterial?'basic':mat.isMeshPhysicalMaterial?'physical':'standard'; const radio=document.querySelector(`input[name="mat-type"][value="${type}"]`); if(radio) radio.checked=true; }
 
 // ========== 渲染面板 ==========
-function buildRenderPanel(){
-    // 原有完整代码 ...
-}
+function buildRenderPanel(){ const cont=document.getElementById('render-controls-container'); cont.innerHTML=`<div class="control-group"><div class="control-title">背景</div><div class="control-row"><span class="control-label">背景颜色</span><input type="color" id="render-bg-color" value="#050518"><span id="render-bg-color-val">#050518</span></div></div><div class="control-group"><div class="control-title">阴影</div><div class="control-row"><span class="control-label">阴影类型</span><div class="option-group"><label class="option-label"><input type="radio" name="shadow-type" value="basic"> 基本</label><label class="option-label"><input type="radio" name="shadow-type" value="pcf"> PCF</label><label class="option-label selected"><input type="radio" name="shadow-type" value="pcfsoft" checked> PCFSoft</label></div></div><div class="control-row"><span class="control-label">贴图尺寸</span><div class="option-group"><label class="option-label"><input type="radio" name="shadow-map-size" value="512"> 512</label><label class="option-label selected"><input type="radio" name="shadow-map-size" value="1024" checked> 1024</label><label class="option-label"><input type="radio" name="shadow-map-size" value="2048"> 2048</label></div></div><div class="control-row"><span class="control-label">偏移(Bias)</span><input type="range" id="shadow-bias" min="0" max="0.01" value="0.0005" step="0.0001"><span class="slider-value" id="shadow-bias-val">0.0005</span></div></div><div class="control-group"><div class="control-title">抗锯齿</div><div class="option-group"><label class="option-label selected"><input type="radio" name="aa-method" value="none" checked> 无</label><label class="option-label"><input type="radio" name="aa-method" value="fxaa"> FXAA</label></div></div><div class="control-group"><div class="control-title">色调映射</div><div class="option-group"><label class="option-label"><input type="radio" name="tone-mapping" value="none"> 无</label><label class="option-label selected"><input type="radio" name="tone-mapping" value="aces" checked> ACES</label><label class="option-label"><input type="radio" name="tone-mapping" value="reinhard"> Reinhard</label></div><div class="control-row" style="margin-top:8px;"><span class="control-label">曝光度</span><input type="range" id="exposure" min="0.2" max="2" value="1.0" step="0.1"><span class="slider-value" id="exposure-val">1.0</span></div></div><div class="control-group"><div class="control-title">预设</div><div class="preset-grid"><button class="preset-btn active" data-render-preset="performance">性能</button><button class="preset-btn" data-render-preset="balanced">平衡</button><button class="preset-btn" data-render-preset="quality">质量</button><button class="preset-btn" data-render-preset="cinematic">电影</button></div></div>`; document.getElementById('render-bg-color').addEventListener('input',function(){ scene.background=new THREE.Color(this.value); document.getElementById('render-bg-color-val').textContent=this.value; }); document.querySelectorAll('input[name="shadow-type"]').forEach(r=>r.addEventListener('change',()=>{ const v=document.querySelector('input[name="shadow-type"]:checked').value; const m={basic:THREE.BasicShadowMap,pcf:THREE.PCFShadowMap,pcfsoft:THREE.PCFSoftShadowMap}; renderer.shadowMap.type=m[v]||THREE.PCFSoftShadowMap; })); document.querySelectorAll('input[name="shadow-map-size"]').forEach(r=>r.addEventListener('change',()=>{ const sz=parseInt(document.querySelector('input[name="shadow-map-size"]:checked').value); if(dirLight&&dirLight.shadow){ dirLight.shadow.mapSize.width=sz; dirLight.shadow.mapSize.height=sz; dirLight.shadow.map.dispose(); dirLight.shadow.map=null; } })); document.getElementById('shadow-bias').addEventListener('input',function(){ document.getElementById('shadow-bias-val').textContent=this.value; if(dirLight&&dirLight.shadow) dirLight.shadow.bias=-parseFloat(this.value); }); document.querySelectorAll('input[name="aa-method"]').forEach(r=>r.addEventListener('change',()=>{ const v=document.querySelector('input[name="aa-method"]:checked').value; fxaaEnabled=(v==='fxaa'); fxaaPass.enabled=fxaaEnabled; })); document.querySelectorAll('input[name="tone-mapping"]').forEach(r=>r.addEventListener('change',()=>{ const v=document.querySelector('input[name="tone-mapping"]:checked').value; const m={none:THREE.NoToneMapping,aces:THREE.ACESFilmicToneMapping,reinhard:THREE.ReinhardToneMapping}; renderer.toneMapping=m[v]||THREE.ACESFilmicToneMapping; })); document.getElementById('exposure').addEventListener('input',function(){ document.getElementById('exposure-val').textContent=parseFloat(this.value).toFixed(1); renderer.toneMappingExposure=parseFloat(this.value); }); document.querySelectorAll('.preset-btn[data-render-preset]').forEach(b=>b.addEventListener('click',()=>{ const pr={performance:{shadowSize:512,shadowType:'basic',toneMapping:'none',exposure:1.0,aa:'none'},balanced:{shadowSize:1024,shadowType:'pcf',toneMapping:'aces',exposure:1.0,aa:'none'},quality:{shadowSize:2048,shadowType:'pcfsoft',toneMapping:'aces',exposure:1.0,aa:'fxaa'},cinematic:{shadowSize:2048,shadowType:'pcfsoft',toneMapping:'aces',exposure:1.3,aa:'fxaa'}}; const p=pr[b.dataset.renderPreset]; if(!p)return; const szR=document.querySelector(`input[name="shadow-map-size"][value="${p.shadowSize}"]`); if(szR){ szR.checked=true; szR.dispatchEvent(new Event('change')); } const tyR=document.querySelector(`input[name="shadow-type"][value="${p.shadowType}"]`); if(tyR){ tyR.checked=true; tyR.dispatchEvent(new Event('change')); } document.getElementById('exposure').value=p.exposure; document.getElementById('exposure-val').textContent=p.exposure.toFixed(1); renderer.toneMappingExposure=p.exposure; const tmR=document.querySelector(`input[name="tone-mapping"][value="${p.toneMapping}"]`); if(tmR){ tmR.checked=true; tmR.dispatchEvent(new Event('change')); } const aaR=document.querySelector(`input[name="aa-method"][value="${p.aa}"]`); if(aaR){ aaR.checked=true; aaR.dispatchEvent(new Event('change')); } document.querySelectorAll('.preset-btn[data-render-preset]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); })); }
 
 // ========== 场景面板 ==========
-function buildScenePanel(){
-    // 原有完整代码 ...
-}
+function buildScenePanel(){ const cont=document.getElementById('scene-controls-container'); cont.innerHTML=`<div class="control-group"><div class="control-title">网格</div><div class="control-row"><button class="toggle-btn" id="grid-show-btn">显示</button><button class="toggle-btn active" id="grid-hide-btn">隐藏</button></div></div><div class="control-group"><div class="control-title">地平面</div><div class="control-row"><button class="toggle-btn" id="ground-show-btn">显示</button><button class="toggle-btn active" id="ground-hide-btn">隐藏</button></div><div class="control-row" style="margin-top:6px;"><span class="control-label">颜色</span><input type="color" id="ground-color-scene" value="#888888"></div><div class="control-row"><span class="control-label">大小</span><input type="range" id="ground-size" min="1" max="30" value="10" step="0.5"><span class="slider-value" id="ground-size-val">10.0</span></div><div class="control-row"><span class="control-label">纹理</span><button class="texture-ctrl-btn" id="ground-upload">⬆️</button><button class="texture-ctrl-btn clear-btn" id="ground-clear">🗑️</button></div></div><div class="control-group"><div class="control-title">背景</div><div class="control-row"><button class="toggle-btn" id="bg-show-btn">显示</button><button class="toggle-btn active" id="bg-hide-btn">隐藏</button></div><div class="control-row" style="margin-top:6px;"><span class="control-label">颜色</span><input type="color" id="bg-color-scene" value="#050518"></div><div class="control-row"><span class="control-label">纹理</span><button class="texture-ctrl-btn" id="bg-upload">⬆️</button><button class="texture-ctrl-btn clear-btn" id="bg-clear">🗑️</button></div></div>`; document.getElementById('grid-show-btn').addEventListener('click',()=>{ gridHelper.visible=true; document.getElementById('grid-show-btn').classList.add('active'); document.getElementById('grid-hide-btn').classList.remove('active'); }); document.getElementById('grid-hide-btn').addEventListener('click',()=>{ gridHelper.visible=false; document.getElementById('grid-hide-btn').classList.add('active'); document.getElementById('grid-show-btn').classList.remove('active'); }); document.getElementById('ground-show-btn').addEventListener('click',()=>{ groundMesh.visible=true; document.getElementById('ground-show-btn').classList.add('active'); document.getElementById('ground-hide-btn').classList.remove('active'); }); document.getElementById('ground-hide-btn').addEventListener('click',()=>{ groundMesh.visible=false; document.getElementById('ground-hide-btn').classList.add('active'); document.getElementById('ground-show-btn').classList.remove('active'); }); document.getElementById('ground-color-scene').addEventListener('input',function(){ groundMesh.material.color.set(this.value); }); document.getElementById('ground-size').addEventListener('input',function(){ const sz=parseFloat(this.value); document.getElementById('ground-size-val').textContent=sz.toFixed(1); const og=groundMesh.geometry; groundMesh.geometry=new THREE.CircleGeometry(sz,64); og.dispose(); }); document.getElementById('ground-upload').addEventListener('click',()=>document.getElementById('hidden-ground-file-input').click()); document.getElementById('ground-clear').addEventListener('click',()=>{ if(groundTexture){ groundTexture.dispose(); groundTexture=null; } groundMesh.material.map=null; groundMesh.material.needsUpdate=true; }); document.getElementById('hidden-ground-file-input').addEventListener('change',function(){ const f=this.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{ const img=new Image(); img.onload=()=>{ if(groundTexture) groundTexture.dispose(); groundTexture=new THREE.Texture(img); groundTexture.wrapS=groundTexture.wrapT=THREE.RepeatWrapping; groundTexture.needsUpdate=true; groundMesh.material.map=groundTexture; groundMesh.material.needsUpdate=true; }; img.src=e.target.result; }; r.readAsDataURL(f); }); document.getElementById('bg-show-btn').addEventListener('click',()=>{ document.getElementById('bg-show-btn').classList.add('active'); document.getElementById('bg-hide-btn').classList.remove('active'); applySceneBg(); }); document.getElementById('bg-hide-btn').addEventListener('click',()=>{ document.getElementById('bg-hide-btn').classList.add('active'); document.getElementById('bg-show-btn').classList.remove('active'); scene.background=null; }); document.getElementById('bg-color-scene').addEventListener('input',applySceneBg); function applySceneBg(){ if(!document.getElementById('bg-show-btn').classList.contains('active'))return; if(bgTexture) scene.background=bgTexture; else scene.background=new THREE.Color(document.getElementById('bg-color-scene').value); } document.getElementById('bg-upload').addEventListener('click',()=>document.getElementById('hidden-bg-file-input').click()); document.getElementById('bg-clear').addEventListener('click',()=>{ if(bgTexture){ bgTexture.dispose(); bgTexture=null; } applySceneBg(); }); document.getElementById('hidden-bg-file-input').addEventListener('change',function(){ const f=this.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{ const img=new Image(); img.onload=()=>{ if(bgTexture) bgTexture.dispose(); bgTexture=new THREE.Texture(img); bgTexture.needsUpdate=true; applySceneBg(); }; img.src=e.target.result; }; r.readAsDataURL(f); }); }
 
 // ========== 重置函数 ==========
-function resetPanelToDefaults(pid,sk){ /* 原函数内容 */ }
-function resetPositioning(){ /* 原函数内容 */ }
-function resetMaterial(){ /* 原函数内容 */ }
-function resetRender(){ /* 原函数内容 */ }
-function resetScene(){ /* 原函数内容 */ }
-function resetTexture(){ /* 原函数内容 */ }
-function resetRotate(){ /* 原函数内容 */ }
+function resetPanelToDefaults(pid,sk){ const p=document.getElementById(pid); if(!p)return; const d=getDefaultParams(sk); const us=p.querySelector('.units-select'); if(us&&d.units) us.value=d.units; const ssl=(sid,iid,v)=>{ const s=document.getElementById(sid),i=document.getElementById(iid); if(s&&i){ s.value=v; i.value=v; s.dispatchEvent(new Event('input')); } }; switch(sk){ case'sphere': ssl('rx-slider','rx-input',d.rx); ssl('ry-slider','ry-input',d.ry); ssl('rz-slider','rz-input',d.rz); break; case'cylinder': ssl('radius-slider','radius-input',d.radius); ssl('height-slider','height-input',d.height); break; case'cone': ssl('cone-radius-slider','cone-radius-input',d.radius); ssl('cone-height-slider','cone-height-input',d.height); break; case'frustum_cone': ssl('top-radius-slider','top-radius-input',d.topRadius); ssl('bottom-radius-slider','bottom-radius-input',d.bottomRadius); ssl('frustum-height-slider','frustum-height-input',d.height); break; case'torus': ssl('tube-radius-slider','tube-radius-input',d.tubeRadius); ssl('ring-radius-slider','ring-radius-input',d.ringRadius); break; case'pipe': ssl('outer-radius-slider','outer-radius-input',d.outerRadius); ssl('inner-radius-slider','inner-radius-input',d.innerRadius); ssl('pipe-length-slider','pipe-length-input',d.length); break; case'square_tube': ssl('outer-width-slider','outer-width-input',d.outerWidth); ssl('outer-height-slider','outer-height-input',d.outerHeight); ssl('inner-width-slider','inner-width-input',d.innerWidth); ssl('inner-height-slider','inner-height-input',d.innerHeight); ssl('square-length-slider','square-length-input',d.length); break; case'cube': ssl('cube-width-slider','cube-width-input',d.width); ssl('cube-depth-slider','cube-depth-input',d.depth); ssl('cube-height-slider','cube-height-input',d.height); break; case'pyramid': ssl('pyramid-width-slider','pyramid-width-input',d.width); ssl('pyramid-depth-slider','pyramid-depth-input',d.depth); ssl('pyramid-height-slider','pyramid-height-input',d.height); break; case'prism_frustum': ssl('top-width-slider','top-width-input',d.topWidth); ssl('top-depth-slider','top-depth-input',d.topDepth); ssl('bottom-width-slider','bottom-width-input',d.bottomWidth); ssl('bottom-depth-slider','bottom-depth-input',d.bottomDepth); ssl('prism-height-slider','prism-height-input',d.height); break; case'plane': ssl('plane-width-slider','plane-width-input',d.width); ssl('plane-height-slider','plane-height-input',d.height); break; } if(currentShape===sk) updateModel(sk); }
+function resetPositioning(){ cameraOffset={x:0,y:0,z:10}; document.getElementById('cam-offset-x-slider').value=0; document.getElementById('cam-offset-x-input').value=0; document.getElementById('cam-offset-y-slider').value=0; document.getElementById('cam-offset-y-input').value=0; document.getElementById('cam-offset-z-slider').value=10; document.getElementById('cam-offset-z-input').value=10; syncCameraFromOffset(); if(document.getElementById('mode-persp')) document.getElementById('mode-persp').click(); }
+function resetMaterial(){ document.querySelector('input[name="mat-type"][value="standard"]').checked=true; document.getElementById('mat-color').value='#ff6600'; document.getElementById('mat-color-val').textContent='#ff6600'; document.getElementById('mat-metalness').value=0.78; document.getElementById('mat-metalness-val').textContent='0.78'; document.getElementById('mat-roughness').value=0.22; document.getElementById('mat-roughness-val').textContent='0.22'; document.getElementById('mat-emissive').value='#000000'; document.getElementById('mat-emissive-val').textContent='#000000'; document.getElementById('mat-emissive-intensity').value=0.1; document.getElementById('mat-emissive-intensity-val').textContent='0.10'; document.getElementById('mat-transparent').checked=false; document.getElementById('mat-opacity').value=0.18; document.getElementById('mat-opacity-val').textContent='0.18'; document.getElementById('tex-repeat-u').value=1; document.getElementById('tex-repeat-v').value=1; document.getElementById('tex-offset-u').value=0; document.getElementById('tex-offset-v').value=0; document.getElementById('tex-rotation').value=0; for(const k of Object.keys(materialTextures)){ if(materialTextures[k]){ if(materialTextures[k].isVideoTexture){ const v=materialTextures[k].image||materialTextures[k].source; if(v&&v.pause){ v.pause(); v.removeAttribute('src'); v.load(); } } materialTextures[k].dispose(); materialTextures[k]=null; } } Object.values(textureStore).forEach(tex=>{ if(tex&&tex.isTexture){ tex.repeat.set(1,1); tex.offset.set(0,0); tex.rotation=0; } }); if(currentModel){ const params={color:new THREE.Color('#ff6600'),metalness:0.78,roughness:0.22,emissive:new THREE.Color('#000000'),emissiveIntensity:0.1,side:THREE.DoubleSide,transparent:false,opacity:1.0}; const oldMat=currentModel.material; const newMat=new THREE.MeshStandardMaterial(params); if(Array.isArray(currentModel.material)) currentModel.material=newMat; else if(currentModel.isGroup) currentModel.children.forEach(c=>{ if(c.material){ c.material.dispose(); c.material=newMat.clone(); } }); else currentModel.material=newMat; if(oldMat&&oldMat!==newMat) oldMat.dispose(); } document.querySelectorAll('.preset-btn[data-mat-preset]').forEach(b=>b.classList.remove('active')); }
+function resetRender(){ scene.background=new THREE.Color('#050518'); document.getElementById('render-bg-color').value='#050518'; document.getElementById('render-bg-color-val').textContent='#050518'; const st=document.querySelector('input[name="shadow-type"][value="pcfsoft"]'); if(st){ st.checked=true; st.dispatchEvent(new Event('change')); } const ss=document.querySelector('input[name="shadow-map-size"][value="1024"]'); if(ss){ ss.checked=true; ss.dispatchEvent(new Event('change')); } document.getElementById('shadow-bias').value=0.0005; document.getElementById('shadow-bias-val').textContent='0.0005'; dirLight.shadow.bias=-0.0005; document.querySelector('input[name="aa-method"][value="none"]').checked=true; fxaaPass.enabled=false; fxaaEnabled=false; const tm=document.querySelector('input[name="tone-mapping"][value="aces"]'); if(tm){ tm.checked=true; tm.dispatchEvent(new Event('change')); } document.getElementById('exposure').value=1.0; document.getElementById('exposure-val').textContent='1.0'; renderer.toneMappingExposure=1.0; document.querySelectorAll('.preset-btn[data-render-preset]').forEach(b=>b.classList.remove('active')); const perf=document.querySelector('.preset-btn[data-render-preset="performance"]'); if(perf) perf.classList.add('active'); }
+function resetScene(){ gridHelper.visible=true; document.getElementById('grid-show-btn').classList.add('active'); document.getElementById('grid-hide-btn').classList.remove('active'); groundMesh.visible=false; document.getElementById('ground-hide-btn').classList.add('active'); document.getElementById('ground-show-btn').classList.remove('active'); groundMesh.material.color.set('#888888'); document.getElementById('ground-color-scene').value='#888888'; document.getElementById('ground-size').value=10; document.getElementById('ground-size-val').textContent='10.0'; const og=groundMesh.geometry; groundMesh.geometry=new THREE.CircleGeometry(10,64); og.dispose(); if(groundTexture){ groundTexture.dispose(); groundTexture=null; } groundMesh.material.map=null; groundMesh.material.needsUpdate=true; document.getElementById('bg-hide-btn').classList.add('active'); document.getElementById('bg-show-btn').classList.remove('active'); document.getElementById('bg-color-scene').value='#050518'; if(bgTexture){ bgTexture.dispose(); bgTexture=null; } scene.background=new THREE.Color('#050518'); }
+function resetTexture(){ for(const k of Object.keys(textureStore)){ const tex=textureStore[k]; if(tex){ if(tex.isVideoTexture){ const v=tex.image||tex.source; if(v&&v.pause){ v.pause(); v.removeAttribute('src'); v.load(); } } tex.dispose(); } delete textureStore[k]; } updateModel(currentShape); if(document.getElementById('texture-settings-panel').classList.contains('visible')) updateTexturePanelContent(); }
+function resetRotate(){ modelsMeta[currentShape]=getDefaultMeta(); loadMetaToUI(currentShape); controls.enablePan = false; controls.enableRotate = true; controls.enableZoom = true; if (window.syncInteractionButtons) syncInteractionButtons(); }
 
-// ========== 全局重置（♊️ 按钮功能） ==========
-function performFullReset() {
-    // 重置所有几何体参数
+// 全局重置所有几何体（供顶部♊️按钮调用）
+function resetAllGeometry() {
     const shapes = Object.keys(DEFAULT_PARAMS);
     shapes.forEach(shape => {
         let panelId;
@@ -2602,308 +2912,227 @@ function performFullReset() {
         else if (shape === 'square_tube') panelId = 'square-tube-settings-panel';
         else panelId = shape + '-settings-panel';
         if (document.getElementById(panelId)) resetPanelToDefaults(panelId, shape);
-    });
-    // 重置位置
-    Object.keys(INITIAL_MODEL_COORDS).forEach(shape => {
-        const model = modelsCache[shape];
-        if (model) {
-            const co = INITIAL_MODEL_COORDS[shape];
-            model.position.set(co.x, co.y, co.z);
+        if (shape !== currentShape && modelsCache[shape]) {
+            if (modelsCache[shape].parent) scene.remove(modelsCache[shape]);
+            modelsCache[shape] = null;
+            delete modelsCache[shape];
         }
     });
-    if (currentModel) {
-        const initPos = INITIAL_MODEL_COORDS[currentShape];
-        if (initPos) {
-            currentModel.position.set(initPos.x, initPos.y, initPos.z);
-            controls.target.copy(currentModel.position);
-        }
-    }
-    // 重置相机
-    cameraOffset = { x:0, y:0, z:10 };
-    syncCameraFromOffset();
-    resetPositioning();
-    // 重置光照
-    resetLighting();
-    // 重置材质
-    resetMaterial();
-    // 重置渲染
-    resetRender();
-    // 重置场景
-    resetScene();
-    // 重置纹理
-    resetTexture();
-    // 重置旋转元数据
-    modelsMeta[currentShape] = getDefaultMeta();
-    loadMetaToUI(currentShape);
-    controls.enablePan = false;
-    controls.enableRotate = true;
-    controls.enableZoom = true;
-    if (window.syncInteractionButtons) syncInteractionButtons();
-    // 清除布尔状态
-    boolTargetAModel = null;
-    boolToolBModel = null;
-    document.getElementById('bool-target-a-status') && (document.getElementById('bool-target-a-status').textContent = '未选择');
-    document.getElementById('bool-tool-b-status') && (document.getElementById('bool-tool-b-status').textContent = '未选择');
-    updateBoolPreview();
-    // 清除修改器堆栈
-    modifierStack.targetObject = null;
-    modifierStack.modifiers = [];
-    refreshModifierList();
-    recalcStack();
-    document.getElementById('stack-target-name') && (document.getElementById('stack-target-name').textContent = '无');
-    // 切换回球体
-    if (currentShape !== 'sphere') {
-        switchToShape('sphere');
-    } else {
-        updateModel('sphere');
-    }
-    // 清除历史
-    historyManager.stack = [];
-    historyManager.currentIndex = -1;
-    historyManager.updateButtons();
-    // 更新纹理面板
-    updateTexturePanelContent();
-}
-
-// ========== 历史记录管理器 ==========
-const historyManager = {
-    stack: [],
-    currentIndex: -1,
-    maxSize: 50,
-    push(state) {
-        if (this.currentIndex < this.stack.length - 1) {
-            this.stack = this.stack.slice(0, this.currentIndex + 1);
-        }
-        this.stack.push(JSON.parse(JSON.stringify(state)));
-        if (this.stack.length > this.maxSize) this.stack.shift();
-        this.currentIndex = this.stack.length - 1;
-        this.updateButtons();
-    },
-    undo() {
-        if (this.currentIndex > 0) {
-            this.currentIndex--;
-            this.applyState(this.stack[this.currentIndex]);
-            this.updateButtons();
-        }
-    },
-    redo() {
-        if (this.currentIndex < this.stack.length - 1) {
-            this.currentIndex++;
-            this.applyState(this.stack[this.currentIndex]);
-            this.updateButtons();
-        }
-    },
-    applyState(state) {
-        if (state.shape !== currentShape) {
-            switchToShape(state.shape);
-        }
-        if (currentModel) {
-            currentModel.position.set(state.pos.x, state.pos.y, state.pos.z);
-            currentModel.rotation.set(state.rot._x || state.rot.x, state.rot._y || state.rot.y, state.rot._z || state.rot.z);
-            currentModel.scale.set(state.scale.x, state.scale.y, state.scale.z);
-            restoreSliderValues(state.params);
-        }
+    const initPos = INITIAL_MODEL_COORDS[currentShape];
+    if (currentModel && initPos) {
+        currentModel.position.set(initPos.x, initPos.y, initPos.z);
         controls.target.copy(currentModel.position);
-        syncCameraFromOffset();
-        updateCoordInputs();
-        updateTexturePanelContent();
-        refreshMaterialPanel();
-    },
-    captureCurrentState() {
-        if (!currentModel) return;
-        const state = {
-            shape: currentShape,
-            pos: currentModel.position.clone(),
-            rot: { x: currentModel.rotation.x, y: currentModel.rotation.y, z: currentModel.rotation.z },
-            scale: currentModel.scale.clone(),
-            params: getCurrentSliderValues()
-        };
-        this.push(state);
-    },
-    updateButtons() {
-        const undoBtn = document.getElementById('btn-undo');
-        const redoBtn = document.getElementById('btn-redo');
-        if (undoBtn) undoBtn.style.opacity = this.currentIndex > 0 ? '1' : '0.5';
-        if (redoBtn) redoBtn.style.opacity = this.currentIndex < this.stack.length - 1 ? '1' : '0.5';
+        const px = document.getElementById(`pos-x-${currentShape}`), py = document.getElementById(`pos-y-${currentShape}`), pz = document.getElementById(`pos-z-${currentShape}`);
+        if (px) px.value = initPos.x;
+        if (py) py.value = initPos.y;
+        if (pz) pz.value = initPos.z;
     }
-};
-
-function getCurrentSliderValues() {
-    // 收集当前形状所有滑块的值
-    const vals = {};
-    const shape = currentShape;
-    const panelId = getShapePanelId(shape);
-    const panel = document.getElementById(panelId + '-settings-panel');
-    if (panel) {
-        panel.querySelectorAll('.slider').forEach(s => {
-            vals[s.id] = s.value;
-        });
-    }
-    return vals;
-}
-
-function restoreSliderValues(vals) {
-    if (!vals) return;
-    Object.entries(vals).forEach(([id, value]) => {
-        const slider = document.getElementById(id);
-        if (slider) {
-            slider.value = value;
-            slider.dispatchEvent(new Event('input'));
-        }
-    });
-}
-
-function updateCoordInputs() {
-    if (!currentModel) return;
-    const px = document.getElementById(`pos-x-${currentShape}`);
-    const py = document.getElementById(`pos-y-${currentShape}`);
-    const pz = document.getElementById(`pos-z-${currentShape}`);
-    if (px) px.value = currentModel.position.x;
-    if (py) py.value = currentModel.position.y;
-    if (pz) pz.value = currentModel.position.z;
+    syncCameraFromOffset();
+    if (currentShape === 'plane') syncPlaneRotation();
 }
 
 // ========== 滑块绑定与面板拖动等 ==========
-function bindSliderAndInput(sid,iid){ /* 原函数 */ }
-// ... 其他绑定，保持不变 ...
+function bindSliderAndInput(sid,iid){ const s=document.getElementById(sid),i=document.getElementById(iid); if(!s||!i)return; const uf=()=>{ let v=parseFloat(i.value); if(isNaN(v))return; v=Math.min(parseFloat(s.max),Math.max(parseFloat(s.min),v)); s.value=v; const d=s.step.includes('.')?s.step.split('.')[1].length:0; i.value=v.toFixed(d); s.dispatchEvent(new Event('input')); }; i.addEventListener('change',uf); s.addEventListener('input',()=>{ const d=s.step.includes('.')?s.step.split('.')[1].length:0; i.value=parseFloat(s.value).toFixed(d); }); }
+const sliderPairs=[['rx-slider','rx-input'],['ry-slider','ry-input'],['rz-slider','rz-input'],['radius-slider','radius-input'],['height-slider','height-input'],['cone-radius-slider','cone-radius-input'],['cone-height-slider','cone-height-input'],['top-radius-slider','top-radius-input'],['bottom-radius-slider','bottom-radius-input'],['frustum-height-slider','frustum-height-input'],['tube-radius-slider','tube-radius-input'],['ring-radius-slider','ring-radius-input'],['cube-width-slider','cube-width-input'],['cube-depth-slider','cube-depth-input'],['cube-height-slider','cube-height-input'],['pyramid-width-slider','pyramid-width-input'],['pyramid-depth-slider','pyramid-depth-input'],['pyramid-height-slider','pyramid-height-input'],['top-width-slider','top-width-input'],['top-depth-slider','top-depth-input'],['bottom-width-slider','bottom-width-input'],['bottom-depth-slider','bottom-depth-input'],['prism-height-slider','prism-height-input'],['plane-width-slider','plane-width-input'],['plane-height-slider','plane-height-input'],['outer-radius-slider','outer-radius-input'],['inner-radius-slider','inner-radius-input'],['pipe-length-slider','pipe-length-input'],['outer-width-slider','outer-width-input'],['outer-height-slider','outer-height-input'],['inner-width-slider','inner-width-input'],['inner-height-slider','inner-height-input'],['square-length-slider','square-length-input']];
+sliderPairs.forEach(([s,i])=>bindSliderAndInput(s,i));
+['rx-slider','ry-slider','rz-slider'].forEach(id=>{ const s=document.getElementById(id); if(s) s.addEventListener('input',()=>{ if(currentShape==='sphere'&&currentModel){ const rx=parseFloat(document.getElementById('rx-slider').value)||1,ry=parseFloat(document.getElementById('ry-slider').value)||1,rz=parseFloat(document.getElementById('rz-slider').value)||1; currentModel.scale.set(rx,ry,rz); } }); });
+function bindShapeSliders(pid,sk){ const p=document.getElementById(pid); if(!p)return; p.querySelectorAll('.slider').forEach(s=>{ s.addEventListener('input',()=>{ if(currentShape===sk) updateModel(sk); }); }); }
+['cylinder-settings-panel','cylinder','cone-settings-panel','cone','frustum-settings-panel','frustum_cone','torus-settings-panel','torus','cube-settings-panel','cube','pyramid-settings-panel','pyramid','plane-settings-panel','plane','pipe-settings-panel','pipe','square-tube-settings-panel','square_tube','prism-frustum-settings-panel','prism_frustum'].reduce((a,c,i,arr)=>{ if(i%2===0) bindShapeSliders(arr[i],arr[i+1]); },null);
+document.querySelectorAll('.min-val, .max-val').forEach(el => el.remove());
 
-// ========== 底部按钮互斥逻辑 ==========
-function setupBottomGroupMutualExclusion() {
-    const bottomBtns = document.querySelectorAll('.bottom-group .btn-bottom');
-    const topContainer = document.getElementById('top-groups-container');
-    const stylePanel = document.getElementById('style-tools-panel');
-    const buildPanel = document.getElementById('build-tools-panel');
-    
-    // 隐藏所有形状按钮（第一行后5个+第二行全部）
-    function hideShapeButtons() {
-        document.querySelectorAll('.shape-btn').forEach(btn => btn.style.display = 'none');
-    }
-    function showShapeButtons() {
-        document.querySelectorAll('.shape-btn').forEach(btn => btn.style.display = 'inline-flex');
-    }
-    
-    // 默认显示形状按钮
-    showShapeButtons();
-    
-    bottomBtns.forEach(btn => {
-        if (btn.id === 'toggle-all-ui-btn') return; // 跳过💠按钮
-        
-        btn.addEventListener('click', (e) => {
-            const category = btn.dataset.category;
-            
-            // 移除所有底部按钮的选中状态
-            bottomBtns.forEach(b => {
-                if (b.id !== 'toggle-all-ui-btn') b.classList.remove('selected-bottom');
-            });
-            btn.classList.add('selected-bottom');
-            
-            // 根据类别显示/隐藏对应元素
-            if (category === 'select') { // 形状
-                showShapeButtons();
-                if (stylePanel) stylePanel.style.display = 'none';
-                if (buildPanel) buildPanel.style.display = 'none';
-                // 关闭可能打开的其他面板
-                document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('visible'));
-            } else if (category === 'style') { // 视角
-                hideShapeButtons();
-                if (stylePanel) stylePanel.style.display = 'flex';
-                if (buildPanel) buildPanel.style.display = 'none';
-            } else if (category === 'combo') { // 构建
-                hideShapeButtons();
-                if (stylePanel) stylePanel.style.display = 'none';
-                if (buildPanel) buildPanel.style.display = 'flex';
-            } else if (category === 'scene') { // 场景
-                hideShapeButtons();
-                if (stylePanel) stylePanel.style.display = 'none';
-                if (buildPanel) buildPanel.style.display = 'none';
-                const scenePanel = document.getElementById('scene-settings-panel');
-                if (scenePanel) {
-                    scenePanel.classList.add('visible');
-                    ensurePanelInitialPosition(scenePanel);
-                    buildScenePanel();
-                }
-            } else if (category === 'storage') {
-                alert('存储功能待开发');
-            } else if (category === 'search') {
-                alert('搜索功能待开发');
-            }
-        });
-    });
-    
-    // 初始状态：默认选中“形状”
-    const defaultBtn = document.querySelector('.btn-bottom[data-category="select"]');
-    if (defaultBtn) {
-        defaultBtn.classList.add('selected-bottom');
-        showShapeButtons();
-        if (stylePanel) stylePanel.style.display = 'none';
-        if (buildPanel) buildPanel.style.display = 'none';
-    }
-}
-
-// ========== 撤销/重做按钮 ==========
-document.getElementById('btn-undo')?.addEventListener('click', () => {
-    historyManager.undo();
-});
-document.getElementById('btn-redo')?.addEventListener('click', () => {
-    historyManager.redo();
-});
-
-// ========== 全局重置按钮 ==========
-document.getElementById('btn-reset-all')?.addEventListener('click', () => {
-    if (confirm('确定要重置所有功能到初始状态吗？此操作不可撤销。')) {
-        performFullReset();
+// 面板拖动
+const panelPositions=new Map(); let dragState=null;
+function setPanelPosition(p,l,t){ p.style.left=l+'px'; p.style.top=t+'px'; }
+function ensurePanelInitialPosition(p){ if(!panelPositions.has(p.id)){ const pw=p.offsetWidth,ph=p.offsetHeight; const l=Math.max(0,(window.innerWidth-pw)/2),t=Math.max(0,(window.innerHeight-ph)/2); panelPositions.set(p.id,{left:l,top:t}); } const pos=panelPositions.get(p.id); setPanelPosition(p,pos.left,pos.top); }
+function startDrag(e,p){ if(e.target.closest('button')&&!e.target.closest('.settings-header'))return; if(e.target.closest('.settings-close')||e.target.closest('.settings-reset')||e.target.closest('.settings-toggle-vis')||e.target.closest('.global-reset-btn'))return; e.preventDefault(); const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY; const r=p.getBoundingClientRect(); dragState={panel:p,startMouseX:cx,startMouseY:cy,startLeft:r.left,startTop:r.top,panelWidth:r.width,panelHeight:r.height}; p.querySelector('.settings-header')?.classList.add('dragging'); document.body.style.userSelect='none'; }
+function onDragMove(e){ if(!dragState)return; e.preventDefault(); const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY; let nl=dragState.startLeft+cx-dragState.startMouseX,nt=dragState.startTop+cy-dragState.startMouseY; setPanelPosition(dragState.panel,nl,nt); panelPositions.set(dragState.panel.id,{left:nl,top:nt}); }
+function endDrag(){ if(!dragState)return; dragState.panel.querySelector('.settings-header')?.classList.remove('dragging'); document.body.style.userSelect=''; dragState=null; }
+document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',endDrag);
+document.addEventListener('touchmove',onDragMove,{passive:false}); document.addEventListener('touchend',endDrag); document.addEventListener('touchcancel',endDrag);
+document.querySelectorAll('.settings-panel,.texture-panel').forEach(p=>{ const h=p.querySelector('.settings-header'); if(h){ h.addEventListener('mousedown',e=>startDrag(e,p)); h.addEventListener('touchstart',e=>startDrag(e,p),{passive:false}); } });
+['boolean-settings-panel','fractal-settings-panel','modifier-stack-panel'].forEach(id => {
+    const panel = document.getElementById(id);
+    if (panel) {
+        const header = panel.querySelector('.settings-header');
+        if (header) {
+            header.addEventListener('mousedown', e => startDrag(e, panel));
+            header.addEventListener('touchstart', e => startDrag(e, panel), { passive: false });
+        }
     }
 });
 
-// ========== 形状按钮（顶部）事件绑定 ==========
-document.querySelectorAll('.shape-btn').forEach(btn => {
+// 工具按钮映射与UI初始化（保留原有面板按钮功能，但不再使用左侧按钮组）
+const closeAllPanels=()=>{ document.querySelectorAll('.settings-panel,.texture-panel').forEach(p=>p.classList.remove('visible')); };
+document.querySelectorAll('.settings-reset').forEach(btn=>btn.addEventListener('click',()=>{ const panel=btn.closest('.settings-panel,.texture-panel'); if(!panel)return; const shape=btn.dataset.shape; if(shape){ resetPanelToDefaults(panel.id,shape); return; } const pt=btn.dataset.panel; if(!pt)return; switch(pt){ case'positioning':resetPositioning();break; case'lighting':resetLighting();break; case'material':resetMaterial();break; case'render':resetRender();break; case'texture':resetTexture();break; case'scene':resetScene();break; case'rotate':resetRotate();break; } }));
+document.querySelectorAll('.settings-toggle-vis').forEach(btn => {
     btn.addEventListener('click', () => {
-        const shape = btn.dataset.shape;
-        if (shape) {
-            // 如果是❇️按钮，打开当前形状的设置面板
-            if (btn.id === 'new-settings-btn') {
-                const tpid = getShapePanelId(currentShape) + '-settings-panel';
-                const p = document.getElementById(tpid);
-                if (p) {
-                    const wv = !p.classList.contains('visible');
-                    closeAllPanels();
-                    p.classList.toggle('visible');
-                    if (wv) ensurePanelInitialPosition(p);
-                }
+        const panelId = btn.dataset.panel;
+        const panel = document.getElementById(panelId);
+        if (panel) {
+            const isTransparent = panel.classList.contains('transparent-mode');
+            if (isTransparent) {
+                panel.classList.remove('transparent-mode');
+                btn.textContent = '显';
             } else {
-                switchToShape(shape);
+                panel.classList.add('transparent-mode');
+                btn.textContent = '隐';
             }
         }
     });
 });
+// ❇️ 按钮已在HTML中绑定，此处无需重复
+const closeBtnMappings={
+    'positioning-close-btn':'positioning-settings-panel',
+    'lighting-close-btn':'lighting-settings-panel',
+    'material-close-btn':'material-settings-panel',
+    'render-close-btn':'render-settings-panel',
+    'scene-close-btn':'scene-settings-panel',
+    'rotate-close-btn':'rotate-settings-panel',
+    'boolean-close-btn':'boolean-settings-panel',
+    'fractal-close-btn':'fractal-settings-panel',
+    'modifier-stack-close-btn':'modifier-stack-panel'
+};
+Object.entries(closeBtnMappings).forEach(([bid,pid])=>{ document.getElementById(bid)?.addEventListener('click',()=>document.getElementById(pid)?.classList.remove('visible')); });
+document.querySelectorAll('.settings-close').forEach(btn=>{ if(!Object.keys(closeBtnMappings).includes(btn.id)) btn.addEventListener('click',()=>btn.closest('.settings-panel')?.classList.remove('visible')); });
 
-// ========== 其他初始化（保持不变） ==========
-const closeAllPanels=()=>{ document.querySelectorAll('.settings-panel,.texture-panel').forEach(p=>p.classList.remove('visible')); };
-// ... 面板拖动、重置按钮绑定等，与原代码相同 ...
+const positioningBtn = document.querySelector('.tool-btn[data-tool="positioning"]');
+if (positioningBtn) positioningBtn.textContent = '相机';
+const rotateBtn = document.querySelector('.tool-btn[data-tool="rotate"]');
+if (rotateBtn) rotateBtn.remove();
+const comboBtn = document.querySelector('.btn-bottom[data-category="combo"]');
+if (comboBtn) comboBtn.textContent = '构建';
+
+const toolMappings = {
+    positioning: 'positioning-settings-panel',
+    material: 'material-settings-panel',
+    lighting: 'lighting-settings-panel',
+    render: 'render-settings-panel',
+    texture: 'texture-settings-panel'
+};
+document.querySelectorAll('.tool-btn[data-tool]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const tool=btn.dataset.tool;
+    if(tool==='texture'){
+        const iv=texturePanel.classList.contains('visible');
+        closeAllPanels();
+        const textureToolBtn = document.getElementById('texture-tool-btn');
+        if(iv){
+            texturePanel.classList.remove('visible');
+            if(textureToolBtn) textureToolBtn.classList.remove('texture-active');
+        } else {
+            texturePanel.classList.add('visible');
+            if(textureToolBtn) textureToolBtn.classList.add('texture-active');
+            ensurePanelInitialPosition(texturePanel);
+            updateTexturePanelContent();
+        }
+        return;
+    }
+    const pid=toolMappings[tool];
+    if(pid){
+        const p=document.getElementById(pid);
+        if(p){
+            const iv=p.classList.contains('visible');
+            closeAllPanels();
+            if(iv) p.classList.remove('visible');
+            else {
+                p.classList.add('visible');
+                ensurePanelInitialPosition(p);
+                if(tool==='positioning') buildCameraPanel();
+                if(tool==='material') { buildMaterialPanel(); refreshMaterialPanel(); }
+                if(tool==='lighting') rebuildLightGUI();
+                if(tool==='render') buildRenderPanel();
+            }
+        }
+    }
+}));
+
+// 构建工具面板内部按钮事件（延迟初始化）
+const buildToolsPanel = document.getElementById('build-tools-panel');
+if (buildToolsPanel) {
+    const buildBtns = buildToolsPanel.querySelectorAll('.tool-btn[data-build-tool]');
+    buildBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tool = btn.dataset.buildTool;
+            const panelMap = {
+                'boolean': 'boolean-settings-panel',
+                'fractal': 'fractal-settings-panel',
+                'modifier-stack': 'modifier-stack-panel'
+            };
+            const panelId = panelMap[tool];
+            if (!panelId) return;
+            const panel = document.getElementById(panelId);
+            if (!panel) return;
+            if (panel.classList.contains('visible')) {
+                panel.classList.remove('visible');
+            } else {
+                closeAllPanels();
+                panel.classList.add('visible');
+                ensurePanelInitialPosition(panel);
+                if (tool === 'boolean' && !panel.dataset.initialized) {
+                    initBooleanPanelEvents();
+                    panel.dataset.initialized = 'true';
+                }
+                if (tool === 'modifier-stack' && !panel.dataset.initialized) {
+                    initModifierStackEvents();
+                    panel.dataset.initialized = 'true';
+                }
+            }
+        });
+    });
+}
+
+// 交换材质和光照按钮顺序
+(function swapMaterialLightButtons(){
+    const container=document.getElementById('style-tools-panel');
+    if(!container)return;
+    const lightBtn=container.querySelector('[data-tool="lighting"]');
+    const matBtn=container.querySelector('[data-tool="material"]');
+    if(lightBtn&&matBtn&&lightBtn.nextSibling!==matBtn){
+        container.insertBefore(matBtn,lightBtn);
+    }
+})();
+
+// 移除形状面板中的网格控件
+(function removeShapeGridControls(){
+    const shapePanelIds=['sphere-settings-panel','cylinder-settings-panel','cone-settings-panel','frustum-settings-panel','torus-settings-panel','cube-settings-panel','pyramid-settings-panel','prism-frustum-settings-panel','plane-settings-panel','pipe-settings-panel','square-tube-settings-panel'];
+    shapePanelIds.forEach(id=>{
+        const panel=document.getElementById(id);
+        if(panel){
+            const gridControl=panel.querySelector('.grid-controls');
+            if(gridControl) gridControl.remove();
+        }
+    });
+})();
+
+// 注入坐标与旋转控件
+injectCoordAndRotateControls();
 
 // ========== 启动 ==========
 initVideoTextureControls();
 setupGestureControls();
-injectCoordAndRotateControls();
-setupBottomGroupMutualExclusion();
-
 const initModel = createBasicSphere(); modelsCache['sphere'] = initModel; scene.add(initModel);
 currentModel = initModel; currentShape = 'sphere';
 const initCoords = INITIAL_MODEL_COORDS['sphere']; currentModel.position.set(initCoords.x, initCoords.y, initCoords.z);
 controls.target.copy(currentModel.position); camera.position.set(initCoords.x + cameraOffset.x, initCoords.y + cameraOffset.y, initCoords.z + cameraOffset.z);
 modelsMeta['sphere'] = getDefaultMeta(); loadMetaToUI('sphere');
+const spherePanel2 = document.getElementById('sphere-settings-panel');
+if (spherePanel2) {
+    const px = spherePanel2.querySelector('#pos-x-sphere');
+    const py = spherePanel2.querySelector('#pos-y-sphere');
+    const pz = spherePanel2.querySelector('#pos-z-sphere');
+    if(px) px.value = initCoords.x;
+    if(py) py.value = initCoords.y;
+    if(pz) pz.value = initCoords.z;
+}
 buildCameraPanel();
 
-// 捕获初始状态
-historyManager.captureCurrentState();
+const clock = new THREE.Clock();
 
-const timer = new THREE.Timer();
-
+// ========== 动画循环 ==========
 function animate() {
     requestAnimationFrame(animate);
-    timer.update();
-    const delta = timer.getDelta();
-    if (delta <= 0 || delta > 0.1) return;
+    let delta = clock.getDelta();
+    if (delta <= 0 || delta > 0.1) delta = 0.016;
     if (currentModel) {
         const pos = currentModel.position;
         gridHelper.position.x = pos.x; gridHelper.position.z = pos.z;
@@ -2931,4 +3160,9 @@ window.addEventListener('resize', () => {
     renderer.setSize(container.clientWidth, container.clientHeight);
     updateFXAASize();
 });
-console.log('✅ 3D几何精粹 · 布局升级版就绪');
+console.log('✅ 3D几何精粹 · 布尔升级版就绪');
+
+// 暴露全局接口供外部HTML脚本使用
+window.switchToShape = switchToShape;
+window.currentShape = currentShape;
+window.resetAllGeometry = resetAllGeometry;
