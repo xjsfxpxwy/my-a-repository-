@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码浏览器 · JS 完美运行版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: #0d1117;
+            color: #e6e6e6;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+        /* 预览页 */
+        .preview-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a2e;
+        }
+        .preview-header {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+        .preview-btn {
+            background: rgba(22,33,62,0.9);
+            border: 1px solid #0f3460;
+            color: #4cc9f0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .preview-btn:hover {
+            background: #0f3460;
+            transform: scale(1.05);
+        }
+        .device-menu {
+            position: absolute;
+            top: 60px;
+            right: 15px;
+            background: #16213e;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 30;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 150px;
+        }
+        .device-menu.show {
+            display: flex;
+        }
+        .device-option {
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .device-option:hover {
+            background: #0f3460;
+        }
+        .device-option.active {
+            background: #4cc9f0;
+            color: #16213e;
+            font-weight: bold;
+        }
+        .preview-frame-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .preview-frame {
+            border: none;
+            background: white;
+            transition: all 0.3s;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border-radius: 4px;
+        }
+        /* 目录页 */
+        .directory-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0d1117;
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+        }
+        .directory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #16213e;
+            border-bottom: 1px solid #0f3460;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .new-file-btn {
+            background: #0f3460;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            user-select: none;
+        }
+        .new-file-btn:hover {
+            background: #1a5a9c;
+        }
+        .add-file-btn {
+            background: #4cc9f0;
+            color: #16213e;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            transition: 0.2s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .add-file-btn:hover {
+            background: #72d4f3;
+            transform: scale(1.05);
+        }
+        .back-btn {
+            background: transparent;
+            color: #4cc9f0;
+            border: 1px solid #0f3460;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .back-btn:hover {
+            background: #0f3460;
+        }
+        .file-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .file-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #161b22;
+            border-radius: 8px;
+            border-left: 4px solid #4cc9f0;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .file-item:hover {
+            background: #1a2332;
+            transform: translateX(5px);
+        }
+        .file-item-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        .file-name {
+            font-weight: bold;
+            color: #4cc9f0;
+            margin-bottom: 3px;
+            word-break: break-all;
+        }
+        .file-path {
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+        .empty-directory {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6c757d;
+            text-align: center;
+        }
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        /* 添加文件菜单 */
+        .add-file-menu {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background: #16213e;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 30;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .add-file-menu.show {
+            display: flex;
+        }
+        .file-type-section {
+            margin-bottom: 15px;
+        }
+        .file-type-title {
+            color: #4cc9f0;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #0f3460;
+            font-weight: bold;
+        }
+        .file-type-option {
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-type-option:hover {
+            background: #0f3460;
+        }
+        .file-added {
+            color: #4cc9f0;
+            font-size: 0.8rem;
+        }
+        /* 源代码页 */
+        .source-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0d1117;
+            z-index: 30;
+            display: none;
+            flex-direction: column;
+        }
+        .source-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #16213e;
+            border-bottom: 1px solid #0f3460;
+            gap: 12px;
+        }
+        .source-title {
+            color: #4cc9f0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            word-break: break-all;
+        }
+        .source-controls {
+            display: flex;
+            gap: 10px;
+            padding: 12px 20px;
+            background: #0d1117;
+            border-bottom: 1px solid #30363d;
+            flex-wrap: wrap;
+        }
+        .source-btn {
+            padding: 8px 15px;
+            background: #0f3460;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .source-btn:hover {
+            background: #1a5a9c;
+        }
+        .source-btn.copy {
+            background: #238636;
+        }
+        .source-btn.copy:hover {
+            background: #2ea043;
+        }
+        .source-btn.delete {
+            background: #da3633;
+        }
+        .source-btn.delete:hover {
+            background: #f85149;
+        }
+        .source-code-container {
+            flex: 1;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+        }
+        #sourceCode {
+            width: 100%;
+            height: 100%;
+            background: #0d1117;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            tab-size: 2;
+        }
+        #sourceCode:focus {
+            border-color: #4cc9f0;
+            box-shadow: 0 0 0 2px rgba(76,201,240,0.15);
+        }
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #238636;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 999;
+            font-weight: 600;
+            animation: fadeInUp 0.3s ease, fadeOut 0.3s ease 1.5s forwards;
+            pointer-events: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; } to { opacity: 0; }
+        }
+        @media (max-width: 768px) {
+            .preview-header { padding: 8px; }
+            .preview-btn { width: 35px; height: 35px; font-size: 16px; }
+            .device-menu { top: 50px; right: 8px; }
+            .preview-frame-wrapper { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 预览页 -->
+    <div class="preview-page" id="previewPage">
+        <div class="preview-header">
+            <div class="preview-btn" id="deviceBtn" title="切换设备">📱</div>
+            <div class="preview-btn" id="directoryBtn" title="文件目录">📂</div>
+            <div class="device-menu" id="deviceMenu">
+                <div class="device-option active" data-device="mobile">📱 手机端</div>
+                <div class="device-option" data-device="tablet">📋 平板端</div>
+                <div class="device-option" data-device="desktop">🖥️ 桌面端</div>
+            </div>
+        </div>
+        <div class="preview-frame-wrapper" id="previewFrameWrapper">
+            <!-- 移除了 sandbox 属性，改用 srcdoc 完美执行 JS -->
+            <iframe id="previewFrame" class="preview-frame" title="预览"></iframe>
+        </div>
+    </div>
+
+    <!-- 目录页 -->
+    <div class="directory-page" id="directoryPage">
+        <div class="directory-header">
+            <div class="new-file-btn" id="newFileBtn">➕ 新建文件</div>
+            <div class="add-file-btn" id="addFileBtn" title="从模板添加">📋</div>
+            <button class="back-btn" id="backToPreviewBtn">⬅️ 返回预览</button>
+        </div>
+        <div class="file-list" id="fileList">
+            <div class="empty-directory">
+                <div class="empty-icon">📁</div>
+                <p>暂无文件</p>
+                <p style="font-size:0.85rem;margin-top:5px;">点击 📋 从模板添加</p>
+            </div>
+        </div>
+        <div class="add-file-menu" id="addFileMenu">
+            <div class="file-type-section">
+                <div class="file-type-title">🌐 HTML</div>
+                <div class="file-type-option" data-file="index.html"><span>index.html</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+            </div>
+            <div class="file-type-section">
+                <div class="file-type-title">🎨 CSS</div>
+                <div class="file-type-option" data-file="style.css"><span>style.css</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+            </div>
+            <div class="file-type-section">
+                <div class="file-type-title">⚡ JavaScript</div>
+                <div class="file-type-option" data-file="defaults.js"><span>defaults.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+                <div class="file-type-option" data-file="scene-core.js"><span>scene-core.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+                <div class="file-type-option" data-file="geometry-factory.js"><span>geometry-factory.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+                <div class="file-type-option" data-file="texture-manager.js"><span>texture-manager.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+                <div class="file-type-option" data-file="model-manager.js"><span>model-manager.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+                <div class="file-type-option" data-file="ui-builder.js"><span>ui-builder.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+                <div class="file-type-option" data-file="lighting-panel.js"><span>lighting-panel.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+                <div class="file-type-option" data-file="material-render.js"><span>material-render.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+                <div class="file-type-option" data-file="slider-bindings.js"><span>slider-bindings.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+                <div class="file-type-option" data-file="main.js"><span>main.js</span><span class="file-added" style="display:none;">✓ 已添加</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 源代码页 -->
+    <div class="source-page" id="sourcePage">
+        <div class="source-header">
+            <div class="source-title" id="sourceTitle">源代码</div>
+            <button class="back-btn" id="backToDirectoryBtn">⬅️ 返回目录</button>
+        </div>
+        <div class="source-controls">
+            <button class="source-btn copy" id="copyCodeBtn">📋 复制代码</button>
+            <button class="source-btn" id="pasteCodeBtn">📥 粘贴代码</button>
+            <button class="source-btn delete" id="deleteFileBtn">🗑️ 删除文件</button>
+        </div>
+        <div class="source-code-container">
+            <textarea id="sourceCode" placeholder="在此编写代码..." spellcheck="false"></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    (() => {
+        // ========== 持久化存储 ==========
+        const STORAGE_KEY = 'code_browser_files_v4';
+        const saveToStorage = (data) => {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+            catch (e) { showToast('⚠️ 存储空间不足'); }
+        };
+        const loadFromStorage = () => {
+            try { const d = localStorage.getItem(STORAGE_KEY); return d ? JSON.parse(d) : null; }
+            catch { return null; }
+        };
+
+        // ========== 状态 ==========
+        let files = loadFromStorage() || {};
+        let currentFile = null;
+        let deviceMode = 'mobile';
+
+        // DOM 元素
+        const previewPage = document.getElementById('previewPage');
+        const directoryPage = document.getElementById('directoryPage');
+        const sourcePage = document.getElementById('sourcePage');
+        const deviceBtn = document.getElementById('deviceBtn');
+        const directoryBtn = document.getElementById('directoryBtn');
+        const backToPreviewBtn = document.getElementById('backToPreviewBtn');
+        const backToDirectoryBtn = document.getElementById('backToDirectoryBtn');
+        const deviceMenu = document.getElementById('deviceMenu');
+        const addFileBtn = document.getElementById('addFileBtn');
+        const addFileMenu = document.getElementById('addFileMenu');
+        const fileList = document.getElementById('fileList');
+        const newFileBtn = document.getElementById('newFileBtn');
+        const sourceCode = document.getElementById('sourceCode');
+        const sourceTitle = document.getElementById('sourceTitle');
+        const previewFrame = document.getElementById('previewFrame');
+        const previewFrameWrapper = document.getElementById('previewFrameWrapper');
+        const copyCodeBtn = document.getElementById('copyCodeBtn');
+        const pasteCodeBtn = document.getElementById('pasteCodeBtn');
+        const deleteFileBtn = document.getElementById('deleteFileBtn');
+        const deviceOptions = document.querySelectorAll('.device-option');
+        const fileTypeOptions = document.querySelectorAll('.file-type-option');
+
+        // ========== 工具函数 ==========
+        const showToast = (msg, dur=1800) => {
+            const old = document.querySelector('.toast');
+            if (old) old.remove();
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => { if (t.parentNode) t.remove(); }, dur+400);
+        };
+        const getFileIcon = name => {
+            const ext = name.split('.').pop().toLowerCase();
+            return { html:'🌐', css:'🎨', js:'⚡', json:'📋', md:'📝', svg:'🖼️' }[ext] || '📄';
+        };
+        const escapeHtml = str => {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        };
+
+        // ========== 菜单控制 ==========
+        const toggleMenu = menu => {
+            const wasOpen = menu.classList.contains('show');
+            deviceMenu.classList.remove('show');
+            addFileMenu.classList.remove('show');
+            if (!wasOpen) menu.classList.add('show');
+        };
+        const closeAllMenus = () => {
+            deviceMenu.classList.remove('show');
+            addFileMenu.classList.remove('show');
+        };
+
+        // ========== 页面切换 ==========
+        const showPreviewPage = () => {
+            previewPage.style.display = 'flex';
+            directoryPage.style.display = 'none';
+            sourcePage.style.display = 'none';
+            closeAllMenus();
+            updatePreview();
+        };
+        const showDirectoryPage = () => {
+            previewPage.style.display = 'none';
+            directoryPage.style.display = 'flex';
+            sourcePage.style.display = 'none';
+            closeAllMenus();
+            updateFileList();
+        };
+        const showSourcePage = (fileName) => {
+            currentFile = fileName;
+            previewPage.style.display = 'none';
+            directoryPage.style.display = 'none';
+            sourcePage.style.display = 'flex';
+            closeAllMenus();
+            sourceTitle.textContent = `📝 ${fileName}`;
+            sourceCode.value = files[fileName] || '';
+            sourceCode.focus();
+        };
+
+        // ========== 设备模式 ==========
+        const setDevice = (device) => {
+            deviceMode = device;
+            deviceOptions.forEach(o => o.classList.toggle('active', o.dataset.device === device));
+            const f = previewFrame, w = previewFrameWrapper;
+            if (device === 'mobile') {
+                f.style.width='375px'; f.style.height='667px'; f.style.maxWidth='100%'; f.style.maxHeight='100%';
+                w.style.alignItems='center'; w.style.justifyContent='center';
+            } else if (device === 'tablet') {
+                f.style.width='768px'; f.style.height='1024px'; f.style.maxWidth='100%'; f.style.maxHeight='100%';
+                w.style.alignItems='center'; w.style.justifyContent='center';
+            } else {
+                f.style.width='100%'; f.style.height='100%'; f.style.maxWidth='100%'; f.style.maxHeight='100%';
+                w.style.alignItems='stretch'; w.style.justifyContent='stretch';
+            }
+            updatePreview();
+        };
+
+        // ========== 文件管理 ==========
+        const persist = () => saveToStorage(files);
+
+        const addFile = (fileName) => {
+            if (files.hasOwnProperty(fileName)) {
+                showToast(`文件 "${fileName}" 已存在`);
+                return false;
+            }
+            files[fileName] = getDefaultContent(fileName);
+            persist();
+            updateFileList();
+            updateFileTypeStatus();
+            updatePreview();
+            showToast(`已添加: ${fileName}`);
+            return true;
+        };
+
+        const deleteFile = (fileName) => {
+            delete files[fileName];
+            if (currentFile === fileName) currentFile = null;
+            persist();
+            updateFileList();
+            updateFileTypeStatus();
+            updatePreview();
+        };
+
+        const updateFileTypeStatus = () => {
+            fileTypeOptions.forEach(opt => {
+                const f = opt.dataset.file;
+                const span = opt.querySelector('.file-added');
+                if (span) span.style.display = files.hasOwnProperty(f) ? 'inline' : 'none';
+            });
+        };
+
+        const updateFileList = () => {
+            fileList.innerHTML = '';
+            const names = Object.keys(files).sort();
+            if (!names.length) {
+                fileList.innerHTML = `<div class="empty-directory"><div class="empty-icon">📁</div><p>暂无文件</p><p style="font-size:0.85rem;">点击 📋 从模板添加</p></div>`;
+                return;
+            }
+            names.forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `<span class="file-item-icon">${getFileIcon(name)}</span>
+                    <div class="file-item-info"><div class="file-name">${escapeHtml(name)}</div><div class="file-path">/${escapeHtml(name)}</div></div>`;
+                div.addEventListener('click', () => showSourcePage(name));
+                fileList.appendChild(div);
+            });
+        };
+
+        const syncCurrentFile = () => {
+            if (currentFile && files.hasOwnProperty(currentFile)) {
+                files[currentFile] = sourceCode.value;
+                persist();
+                updatePreview();
+            }
+        };
+
+        // ========== 核心：预览生成（全文件串联 + 独立 script 标签）==========
+        const updatePreview = () => {
+            const htmlFile = files['index.html'] || '';
+
+            // ---- 收集所有 CSS (style.css 优先) ----
+            const allCssFiles = Object.keys(files)
+                .filter(f => f.endsWith('.css'))
+                .sort((a,b) => (a === 'style.css' ? -1 : b === 'style.css' ? 1 : a.localeCompare(b)));
+            const combinedCSS = allCssFiles.map(f => files[f]).join('\n');
+
+            // ---- 收集所有 JS (预设顺序优先) ----
+            const predefinedOrder = [
+                'defaults.js','scene-core.js','geometry-factory.js','texture-manager.js',
+                'model-manager.js','ui-builder.js','lighting-panel.js','material-render.js',
+                'slider-bindings.js','main.js'
+            ];
+            const orderMap = {};
+            predefinedOrder.forEach((name, idx) => { orderMap[name] = idx; });
+
+            const allJsFiles = Object.keys(files)
+                .filter(f => f.endsWith('.js'))
+                .sort((a,b) => {
+                    const ia = orderMap.hasOwnProperty(a) ? orderMap[a] : 9999;
+                    const ib = orderMap.hasOwnProperty(b) ? orderMap[b] : 9999;
+                    if (ia !== ib) return ia - ib;
+                    return a.localeCompare(b);
+                });
+
+            // 为每个 JS 文件生成独立的 <script> 标签，避免合并干扰
+            const jsScripts = allJsFiles.map(f => `<script>\n${files[f]}\n<\/script>`).join('\n');
+
+            // ---- 构建最终 HTML ----
+            let finalHtml;
+            if (htmlFile.trim()) {
+                finalHtml = htmlFile;
+                // 注入 CSS
+                if (combinedCSS.trim()) {
+                    const cssBlock = `<style>\n${combinedCSS}\n</style>`;
+                    if (/<\/head>/i.test(finalHtml)) {
+                        finalHtml = finalHtml.replace(/<\/head>/i, cssBlock + '\n</head>');
+                    } else if (/<head[^>]*>/i.test(finalHtml)) {
+                        finalHtml = finalHtml.replace(/(<head[^>]*>)/i, '$1\n' + cssBlock);
+                    } else if (/<html[^>]*>/i.test(finalHtml)) {
+                        finalHtml = finalHtml.replace(/(<html[^>]*>)/i, '$1\n<head>' + cssBlock + '</head>');
+                    } else {
+                        finalHtml = cssBlock + '\n' + finalHtml;
+                    }
+                }
+                // 注入 JS
+                if (jsScripts.trim()) {
+                    if (/<\/body>/i.test(finalHtml)) {
+                        finalHtml = finalHtml.replace(/<\/body>/i, jsScripts + '\n</body>');
+                    } else if (/<body[^>]*>/i.test(finalHtml)) {
+                        finalHtml += '\n' + jsScripts;
+                    } else if (/<\/html>/i.test(finalHtml)) {
+                        finalHtml = finalHtml.replace(/<\/html>/i, jsScripts + '\n</html>');
+                    } else {
+                        finalHtml += '\n' + jsScripts;
+                    }
+                }
+            } else {
+                // 无 HTML 时生成完整骨架，确保 JS 执行
+                finalHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>预览</title>
+${combinedCSS.trim() ? `<style>\n${combinedCSS}\n</style>` : ''}
+</head>
+<body>
+<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:#f8f9fa;color:#333;">
+  <div style="text-align:center;"><div style="font-size:64px;">👋</div><h1>代码浏览器预览</h1><p>所有 CSS/JS 文件已自动加载</p></div>
+</div>
+${jsScripts || ''}
+</body></html>`;
+            }
+
+            // 使用 srcdoc 注入，完美兼容并保证脚本执行
+            previewFrame.srcdoc = finalHtml;
+        };
+
+        // ========== 默认内容 ==========
+        const getDefaultContent = (fileName) => {
+            const ext = fileName.split('.').pop().toLowerCase();
+            if (ext === 'html') {
+                return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>我的网页</title></head>
+<body>
+  <div class="container">
+    <h1>欢迎</h1>
+    <button id="myButton">点击我</button>
+  </div>
+</body>
+</html>`;
+            }
+            if (ext === 'css') {
+                return `body {
+  font-family: Arial;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  min-height: 100vh;
+}
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.1);
+  padding: 30px;
+  border-radius: 15px;
+}
+button {
+  padding: 12px 24px;
+  background: #4cc9f0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}`;
+            }
+            if (ext === 'js') {
+                if (fileName === 'main.js') {
+                    return `// main.js
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('myButton');
+    if (btn) {
+        btn.addEventListener('click', function() {
+            alert('按钮被点击了！JS 正常运行。');
+        });
+    }
+    console.log('main.js 已执行');
+});`;
+                }
+                return `// ${fileName}\nconsole.log('${fileName} 已加载');`;
+            }
+            return `// ${fileName}`;
+        };
+
+        // ========== 剪贴板 ==========
+        const copyCode = async () => {
+            try { await navigator.clipboard.writeText(sourceCode.value); showToast('✅ 已复制'); }
+            catch { sourceCode.select(); document.execCommand('copy'); showToast('✅ 已复制 (旧版)'); }
+        };
+        const pasteCode = async () => {
+            try {
+                const t = await navigator.clipboard.readText();
+                sourceCode.value = t;
+                syncCurrentFile();
+                showToast('📥 已粘贴');
+            } catch { showToast('请手动粘贴 (Ctrl+V)'); sourceCode.focus(); }
+        };
+
+        // ========== 事件绑定 ==========
+        deviceBtn.addEventListener('click', e => { e.stopPropagation(); toggleMenu(deviceMenu); });
+        addFileBtn.addEventListener('click', e => { e.stopPropagation(); updateFileTypeStatus(); toggleMenu(addFileMenu); });
+        directoryBtn.addEventListener('click', showDirectoryPage);
+        backToPreviewBtn.addEventListener('click', showPreviewPage);
+        backToDirectoryBtn.addEventListener('click', showDirectoryPage);
+
+        deviceOptions.forEach(o => o.addEventListener('click', () => { setDevice(o.dataset.device); closeAllMenus(); }));
+        fileTypeOptions.forEach(o => o.addEventListener('click', () => { addFile(o.dataset.file); closeAllMenus(); }));
+
+        newFileBtn.addEventListener('click', () => {
+            const name = prompt('输入文件名（含扩展名）：');
+            if (name && name.trim()) addFile(name.trim());
+        });
+
+        copyCodeBtn.addEventListener('click', copyCode);
+        pasteCodeBtn.addEventListener('click', pasteCode);
+        deleteFileBtn.addEventListener('click', () => {
+            if (!currentFile) return showToast('没有选中文件');
+            if (confirm(`确定删除 ${currentFile} ？`)) {
+                const f = currentFile;
+                deleteFile(f);
+                showDirectoryPage();
+                showToast(`已删除: ${f}`);
+            }
+        });
+
+        sourceCode.addEventListener('input', syncCurrentFile);
+        sourceCode.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                syncCurrentFile();
+                showToast('💾 已保存并更新预览');
+            }
+        });
+
+        document.addEventListener('click', e => {
+            if (!deviceBtn.contains(e.target) && !deviceMenu.contains(e.target)) deviceMenu.classList.remove('show');
+            if (!addFileBtn.contains(e.target) && !addFileMenu.contains(e.target)) addFileMenu.classList.remove('show');
+        });
+        window.addEventListener('resize', () => { if (deviceMode === 'desktop') updatePreview(); });
+
+        // ========== 启动 ==========
+        const init = () => {
+            if (!Object.keys(files).length) {
+                files['index.html'] = getDefaultContent('index.html');
+                files['style.css'] = getDefaultContent('style.css');
+                files['main.js'] = getDefaultContent('main.js');
+                persist();
+            }
+            updateFileTypeStatus();
+            updateFileList();
+            setDevice('mobile');
+            showPreviewPage();
+        };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+    })();
+</script>
+</body>
+</html>
+
+
+
+
+Resources
