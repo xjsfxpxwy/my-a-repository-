@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全景立方体播放器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff00ff, #00ffff, #ffff00);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #container {
+            width: 90vw;
+            height: 70vh;
+            position: relative;
+        }
+        
+        #render-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        #top-controls {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 20;
+        }
+        
+        .dot-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+            border: none;
+        }
+        
+        #center-btn {
+            position: absolute;
+            top: 60vh; /* 修改为60vh */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 28px;
+            z-index: 15;
+            color: white;
+            border: none;
+        }
+        
+        #face-selector {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: transparent;
+            padding: 10px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        #face-selector.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .face-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            color: white;
+            border: 1px solid white;
+        }
+        
+        .face-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        #modeIndicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        #editPanel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .panel-section {
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .panel-title {
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #00ffff;
+        }
+        
+        .code-area {
+            width: 100%;
+            height: 150px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .links-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .link-input {
+            width: 100%;
+            padding: 8px;
+            background: #2d2d2d;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            color: white;
+        }
+        
+        #uploadStatus {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background: rgba(0, 200, 0, 0.8);
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        #uploadStatus.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        #memoryStatus {
+            position: fixed;
+            top: 60px;
+            left: 20px;
+            padding: 8px 12px;
+            background: rgba(100, 100, 255, 0.8);
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        #memoryStatus.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="render-container"></div>
+        
+        <div id="top-controls">
+            <button class="dot-btn">·</button>
+            <button class="dot-btn">·</button>
+        </div>
+        
+        <button id="center-btn">🔘</button>
+        
+        <div id="face-selector">
+            <div class="face-btn" data-face="right">1</div>
+            <div class="face-btn" data-face="back">2</div>
+            <div class="face-btn" data-face="left">3</div>
+            <div class="face-btn" data-face="front">4</div>
+            <div class="face-btn" data-face="up">5</div>
+            <div class="face-btn" data-face="down">6</div>
+        </div>
+    </div>
+    
+    <div id="modeIndicator">全景模式</div>
+    
+    <input type="file" id="fileInput" class="file-input" accept="image/*,video/*">
+    <div id="uploadStatus">上传成功</div>
+    <div id="memoryStatus">内存使用: 0MB</div>
+    
+    <div id="editPanel">
+        <div class="panel-section">
+            <div class="panel-title">HTML</div>
+            <textarea class="code-area" id="htmlCode"></textarea>
+        </div>
+        
+        <div class="panel-section">
+            <div class="panel-title">CSS</div>
+            <textarea class="code-area" id="cssCode"></textarea>
+        </div>
+        
+        <div class="panel-section">
+            <div class="panel-title">JavaScript</div>
+            <textarea class="code-area" id="jsCode"></textarea>
+        </div>
+        
+        <div class="panel-section">
+            <div class="panel-title">链接</div>
+            <div class="links-container">
+                <input type="text" class="link-input" placeholder="链接1">
+                <input type="text" class="link-input" placeholder="链接2">
+                <input type="text" class="link-input" placeholder="链接3">
+                <input type="text" class="link-input" placeholder="链接4">
+                <input type="text" class="link-input" placeholder="链接5">
+                <input type="text" class="link-input" placeholder="链接6">
+                <input type="text" class="link-input" placeholder="链接7">
+                <input type="text" class="link-input" placeholder="链接8">
+                <input type="text" class="link-input" placeholder="链接9">
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 初始化Three.js场景
+        let scene, camera, renderer, cube, controls;
+        let currentMode = 'panorama';
+        let isDragging = false;
+        let startX = 0;
+        let startAngle = 0;
+        let currentAngle = 0;
+        let targetAngle = 0;
+        let rotationVelocity = 0;
+        const rotationSpeed = 0.5;
+        const friction = 0.95;
+        const snapThreshold = 5;
+        let lastTimestamp = 0;
+        let initialDistance = 0;
+        
+        // 内存管理优化
+        const videoElements = {};
+        const objectURLs = {};
+        let memoryUsage = 0;
+        
+        // 默认图片URL
+        const placeholderImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        
+        // 立方体面配置
+        const faces = {
+            right: { index: 0 },
+            left: { index: 1 },
+            up: { index: 2 },
+            down: { index: 3 },
+            front: { index: 4 },
+            back: { index: 5 }
+        };
+        
+        // 房间数据
+        const room = {
+            images: {
+                right: { type: 'image', url: placeholderImage },
+                left: { type: 'image', url: placeholderImage },
+                up: { type: 'image', url: placeholderImage },
+                down: { type: 'image', url: placeholderImage },
+                front: { type: 'image', url: placeholderImage },
+                back: { type: 'image', url: placeholderImage }
+            }
+        };
+        
+        // 初始化Three.js
+        function initThree() {
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff);
+            
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, 90 / 70, 0.1, 1000);
+            camera.position.z = 0.1;
+            
+            // 创建立方体（房间）
+            const geometry = new THREE.BoxGeometry(10, 12, 10);
+            const materials = [];
+            
+            // 创建六个面的材质
+            Object.keys(faces).forEach(face => {
+                const media = room.images[face];
+                let texture;
+                
+                if (media.type === 'video') {
+                    // 使用缓存的视频元素
+                    if (!videoElements[face]) {
+                        videoElements[face] = createVideoElement(media.url);
+                    }
+                    texture = new THREE.VideoTexture(videoElements[face]);
+                } else {
+                    // 图片纹理
+                    texture = new THREE.TextureLoader().load(media.url);
+                }
+                
+                materials.push(new THREE.MeshBasicMaterial({ 
+                    map: texture,
+                    side: THREE.BackSide
+                }));
+            });
+            
+            cube = new THREE.Mesh(geometry, materials);
+            scene.add(cube);
+            
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(90 * window.innerWidth / 100, 70 * window.innerHeight / 100);
+            document.getElementById('render-container').appendChild(renderer.domElement);
+            
+            // 创建轨道控制器
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enabled = false;
+            
+            // 设置初始相机位置
+            camera.lookAt(new THREE.Vector3(0, 0, -5));
+            
+            // 添加窗口大小变化监听
+            window.addEventListener('resize', onWindowResize);
+            
+            // 添加事件监听
+            setupEventListeners();
+            
+            // 开始动画循环
+            animate();
+            
+            // 页面卸载时释放资源
+            window.addEventListener('beforeunload', releaseAllResources);
+        }
+        
+        // 创建视频元素
+        function createVideoElement(url) {
+            const video = document.createElement('video');
+            video.src = url;
+            video.autoplay = true;
+            video.loop = true;
+            video.muted = true;
+            video.playsInline = true;
+            video.controls = false;
+            return video;
+        }
+        
+        // 窗口大小变化处理
+        function onWindowResize() {
+            const width = 90 * window.innerWidth / 100;
+            const height = 70 * window.innerHeight / 100;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+        
+        // 旋转动画函数
+        function rotateCube(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const deltaTime = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+            
+            if (Math.abs(rotationVelocity) > snapThreshold) {
+                rotationVelocity *= friction;
+                currentAngle += rotationVelocity * deltaTime / 16;
+            } else {
+                // 对齐到最近的90度
+                const remainder = currentAngle % 90;
+                if (Math.abs(remainder) > 45) {
+                    currentAngle += remainder > 0 ? 90 - remainder : -90 - remainder;
+                } else {
+                    currentAngle -= remainder;
+                }
+                rotationVelocity = 0;
+            }
+            
+            // 应用旋转
+            cube.rotation.y = currentAngle * (Math.PI / 180);
+            
+            // 继续动画
+            if (Math.abs(rotationVelocity) > 0.1 || Math.abs(currentAngle % 90) > 0.1) {
+                requestAnimationFrame(rotateCube);
+            }
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            const container = document.getElementById('container');
+            const centerBtn = document.getElementById('center-btn');
+            const dotBtns = document.querySelectorAll('.dot-btn');
+            const faceSelector = document.getElementById('face-selector');
+            const fileInput = document.getElementById('fileInput');
+            const editPanel = document.getElementById('editPanel');
+            
+            // 中心按钮点击事件
+            centerBtn.addEventListener('click', () => {
+                faceSelector.classList.toggle('visible');
+            });
+            
+            // 点按钮点击事件
+            let leftDotClicked = false;
+            
+            dotBtns[0].addEventListener('click', () => {
+                leftDotClicked = true;
+            });
+            
+            dotBtns[1].addEventListener('click', () => {
+                if (leftDotClicked) {
+                    editPanel.style.display = 'flex';
+                    leftDotClicked = false;
+                }
+            });
+            
+            // 关闭编辑面板
+            editPanel.addEventListener('click', (e) => {
+                if (e.target === editPanel) {
+                    editPanel.style.display = 'none';
+                }
+            });
+            
+            // 面按钮点击事件
+            const faceButtons = document.querySelectorAll('.face-btn');
+            faceButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const face = button.getAttribute('data-face');
+                    fileInput.setAttribute('data-face', face);
+                    fileInput.value = '';
+                    fileInput.click();
+                });
+            });
+            
+            // 文件选择事件
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // 触摸事件
+            container.addEventListener('touchstart', handleTouchStart);
+            container.addEventListener('touchmove', handleTouchMove);
+            container.addEventListener('touchend', handleTouchEnd);
+            
+            // 鼠标事件
+            container.addEventListener('mousedown', handleMouseDown);
+            container.addEventListener('mousemove', handleMouseMove);
+            container.addEventListener('mouseup', handleMouseUp);
+            container.addEventListener('mouseleave', handleMouseLeave);
+        }
+        
+        // 触摸开始处理
+        function handleTouchStart(e) {
+            if (e.touches.length === 1 && currentMode === 'panorama') {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+                startAngle = currentAngle;
+                rotationVelocity = 0;
+            } else if (e.touches.length === 2) {
+                initialDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            }
+        }
+        
+        // 触摸移动处理
+        function handleTouchMove(e) {
+            if (e.touches.length === 1 && isDragging && currentMode === 'panorama') {
+                const deltaX = e.touches[0].clientX - startX;
+                startX = e.touches[0].clientX;
+                
+                currentAngle += deltaX * rotationSpeed;
+                rotationVelocity = deltaX * rotationSpeed;
+                
+                cube.rotation.y = currentAngle * (Math.PI / 180);
+                
+                e.preventDefault();
+            } else if (e.touches.length === 2) {
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentDistance = Math.hypot(
+                    touch1.clientX - touch2.clientX,
+                    touch1.clientY - touch2.clientY
+                );
+                
+                if (initialDistance > 0) {
+                    const distanceRatio = currentDistance / initialDistance;
+                    
+                    if (distanceRatio < 0.7) {
+                        setMode('free');
+                    } else if (distanceRatio > 1.3) {
+                        setMode('panorama');
+                    }
+                }
+                
+                e.preventDefault();
+            }
+        }
+        
+        // 触摸结束处理
+        function handleTouchEnd() {
+            isDragging = false;
+            initialDistance = 0;
+            if (currentMode === 'panorama') {
+                lastTimestamp = 0;
+                requestAnimationFrame(rotateCube);
+            }
+        }
+        
+        // 鼠标按下处理
+        function handleMouseDown(e) {
+            if (currentMode === 'panorama') {
+                startX = e.clientX;
+                isDragging = true;
+                startAngle = currentAngle;
+                rotationVelocity = 0;
+            }
+        }
+        
+        // 鼠标移动处理
+        function handleMouseMove(e) {
+            if (isDragging && currentMode === 'panorama') {
+                const deltaX = e.clientX - startX;
+                startX = e.clientX;
+                
+                currentAngle += deltaX * rotationSpeed;
+                rotationVelocity = deltaX * rotationSpeed;
+                
+                cube.rotation.y = currentAngle * (Math.PI / 180);
+            }
+        }
+        
+        // 鼠标释放处理
+        function handleMouseUp() {
+            isDragging = false;
+            if (currentMode === 'panorama') {
+                lastTimestamp = 0;
+                requestAnimationFrame(rotateCube);
+            }
+        }
+        
+        // 鼠标离开处理
+        function handleMouseLeave() {
+            isDragging = false;
+            if (currentMode === 'panorama') {
+                lastTimestamp = 0;
+                requestAnimationFrame(rotateCube);
+            }
+        }
+        
+        // 文件选择处理
+        function handleFileSelect(e) {
+            const face = e.target.getAttribute('data-face');
+            const file = e.target.files[0];
+            
+            if (file) {
+                // 释放旧资源
+                releaseMediaResources(face);
+                
+                // 创建对象URL
+                const objectURL = URL.createObjectURL(file);
+                objectURLs[face] = objectURL;
+                
+                const isVideo = file.type.startsWith('video/');
+                
+                // 更新房间媒体
+                room.images[face] = {
+                    type: isVideo ? 'video' : 'image',
+                    url: objectURL
+                };
+                
+                // 更新纹理
+                updateRoomTextures();
+                
+                // 显示上传状态
+                showUploadStatus(`已上传${isVideo ? '视频' : '图片'}到${face}面`);
+                
+                // 更新内存使用
+                updateMemoryUsage(file.size);
+            }
+        }
+        
+        // 设置当前模式
+        function setMode(mode) {
+            currentMode = mode;
+            controls.enabled = (mode === 'free');
+            document.getElementById('modeIndicator').textContent = 
+                mode === 'free' ? '自由模式' : '全景模式';
+            
+            if (mode === 'panorama') {
+                camera.position.set(0, 0, 0.1);
+                camera.lookAt(0,0,0);
+                currentAngle = cube.rotation.y * (180 / Math.PI);
+                lastTimestamp = 0;
+                rotationVelocity = 0;
+                if (!isDragging) {
+                    requestAnimationFrame(rotateCube);
+                }
+            }
+        }
+        
+        // 更新房间纹理
+        function updateRoomTextures() {
+            Object.keys(faces).forEach(face => {
+                const media = room.images[face];
+                const index = faces[face].index;
+                
+                if (media.type === 'video') {
+                    // 使用缓存的视频元素
+                    if (!videoElements[face]) {
+                        videoElements[face] = createVideoElement(media.url);
+                    }
+                    
+                    // 更新纹理
+                    cube.material[index].map = new THREE.VideoTexture(videoElements[face]);
+                } else {
+                    // 更新图片纹理
+                    const texture = new THREE.TextureLoader().load(media.url);
+                    cube.material[index].map = texture;
+                }
+                
+                cube.material[index].needsUpdate = true;
+            });
+        }
+        
+        // 释放媒体资源
+        function releaseMediaResources(face) {
+            // 释放对象URL
+            if (objectURLs[face]) {
+                URL.revokeObjectURL(objectURLs[face]);
+                delete objectURLs[face];
+            }
+            
+            // 释放视频资源
+            if (videoElements[face]) {
+                videoElements[face].pause();
+                videoElements[face].src = '';
+                delete videoElements[face];
+            }
+            
+            // 释放Three.js资源
+            if (cube && cube.material[faces[face].index]) {
+                const material = cube.material[faces[face].index];
+                if (material.map) {
+                    material.map.dispose();
+                }
+            }
+        }
+        
+        // 释放所有资源
+        function releaseAllResources() {
+            Object.keys(faces).forEach(face => {
+                releaseMediaResources(face);
+            });
+        }
+        
+        // 更新内存使用
+        function updateMemoryUsage(fileSize) {
+            memoryUsage += fileSize / (1024 * 1024); // 转换为MB
+            showMemoryStatus(`内存使用: ${memoryUsage.toFixed(2)}MB`);
+        }
+        
+        // 显示上传状态
+        function showUploadStatus(message) {
+            const status = document.getElementById('uploadStatus');
+            status.textContent = message;
+            status.classList.add('show');
+            
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 2000);
+        }
+        
+        // 显示内存状态
+        function showMemoryStatus(message) {
+            const status = document.getElementById('memoryStatus');
+            status.textContent = message;
+            status.classList.add('show');
+            
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 动画循环
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (currentMode === 'free') {
+                controls.update();
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', initThree);
+    </script>
+</body>
+</html>
